@@ -1,12 +1,17 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import VillaHero from "@/components/VillaHero";
+import VillaFeatures from "@/components/VillaFeatures";
+import VillaLocation from "@/components/VillaLocation";
+import VillaTestimonial from "@/components/VillaTestimonial";
+import VillaContact from "@/components/VillaContact";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen">
+      <VillaHero />
+      <VillaFeatures />
+      <VillaLocation />
+      <VillaTestimonial />
+      <VillaContact />
     </div>
   );
 };
