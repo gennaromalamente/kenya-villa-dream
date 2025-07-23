@@ -4,7 +4,7 @@ import villaHero from "@/assets/villa-hero.jpg";
 
 const VillaHero = () => {
   return (
-    <section className="villa-hero relative">
+    <section className="villa-hero relative pt-16">
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{

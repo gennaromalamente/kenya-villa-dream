@@ -30,7 +30,7 @@ const features = [
   {
     icon: <Wifi className="w-8 h-8" />,
     title: "Comfort Moderni",
-    description: "WiFi, aria condizionata e tutti i servizi necessari"
+    description: "WiFi gratuito, sicurezza h24 e tutti i servizi necessari"
   }
 ];
 
