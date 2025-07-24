@@ -14,13 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      availability: {
+        Row: {
+          date: string
+          is_available: boolean
+          price_per_night: number
+        }
+        Insert: {
+          date: string
+          is_available: boolean
+          price_per_night: number
+        }
+        Update: {
+          date?: string
+          is_available?: boolean
+          price_per_night?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_availability_data: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

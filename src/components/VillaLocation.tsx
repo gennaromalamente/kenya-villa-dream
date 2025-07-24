@@ -67,15 +67,24 @@ const VillaLocation = () => {
             <Card className="overflow-hidden shadow-2xl hover-lift">
               <CardContent className="p-0">
                 <div className="relative">
-                  <div className="bg-gradient-to-br from-primary to-accent h-64 flex items-center justify-center">
-                    <div className="text-center text-white">
-                      <MapPin className="w-16 h-16 mx-auto mb-4 opacity-80" />
-                      <h3 className="text-2xl font-bold">Kenya Coast</h3>
-                      <p className="opacity-90">La tua villa paradisiaca</p>
-                    </div>
-                  </div>
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31724.82!2d39.6692!3d-4.0435!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNMKwMDInMzYuNiJTIDM5wrA0MCcwOS4xIkU!5e0!3m2!1sit!2sit!4v1"
+                    width="100%"
+                    height="300"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Villa Kenya Location"
+                    className="rounded-t-lg"
+                  />
                   
                   <div className="p-8 bg-white">
+                    <div className="text-center mb-6">
+                      <h3 className="text-2xl font-bold text-primary mb-2">Kenya Coast</h3>
+                      <p className="text-muted-foreground">La tua villa paradisiaca</p>
+                    </div>
+                    
                     <div className="grid grid-cols-2 gap-6 text-center">
                       <div>
                         <div className="text-2xl font-bold text-primary">10 min</div>
@@ -93,6 +102,18 @@ const VillaLocation = () => {
                         <div className="text-2xl font-bold text-accent">28°C</div>
                         <div className="text-sm text-muted-foreground">tutto l'anno</div>
                       </div>
+                    </div>
+                    
+                    <div className="mt-6 text-center">
+                      <a 
+                        href="https://maps.app.goo.gl/1kaxXxzV4v7V2wLc7"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center space-x-2 text-primary hover:text-primary-dark transition-colors"
+                      >
+                        <MapPin className="w-4 h-4" />
+                        <span>Apri in Google Maps</span>
+                      </a>
                     </div>
                   </div>
                 </div>
