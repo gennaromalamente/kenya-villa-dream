@@ -5,12 +5,30 @@ import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CalendarDays, Euro, Users, Clock } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { CalendarDays, Euro, Users, Clock, Loader2 } from "lucide-react";
+
+interface BookingFormData {
+  guest_name: string;
+  guest_email: string;
+  guest_phone?: string;
+  special_requests?: string;
+}
 
 const VillaCalendar = () => {
   const [checkIn, setCheckIn] = useState<Date>();
   const [checkOut, setCheckOut] = useState<Date>();
   const [guests, setGuests] = useState(2);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  
+  const form = useForm<BookingFormData>();
 
   const pricePerNight = 180; // €180 per notte
   
@@ -38,6 +56,47 @@ const VillaCalendar = () => {
     return unavailableDates.some(unavailableDate => 
       date.toDateString() === unavailableDate.toDateString()
     );
+  };
+
+  const handleBookingSubmit = async (data: BookingFormData) => {
+    if (!checkIn || !checkOut) return;
+    
+    setIsLoading(true);
+    try {
+      const { data: result, error } = await supabase.functions.invoke('booking-system', {
+        body: {
+          guest_name: data.guest_name,
+          guest_email: data.guest_email,
+          guest_phone: data.guest_phone,
+          check_in: checkIn.toISOString().split('T')[0],
+          check_out: checkOut.toISOString().split('T')[0],
+          guests_count: guests,
+          special_requests: data.special_requests,
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Prenotazione confermata!",
+        description: `La tua prenotazione è stata registrata con successo. ID: ${result.booking_id}`,
+      });
+      
+      setIsBookingModalOpen(false);
+      form.reset();
+      setCheckIn(undefined);
+      setCheckOut(undefined);
+      setGuests(2);
+    } catch (error) {
+      console.error('Booking error:', error);
+      toast({
+        title: "Errore nella prenotazione",
+        description: "Si è verificato un errore. Riprova più tardi.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -147,6 +206,7 @@ const VillaCalendar = () => {
                 <Button 
                   className="w-full bg-primary hover:bg-primary-dark"
                   disabled={!checkIn || !checkOut}
+                  onClick={() => setIsBookingModalOpen(true)}
                 >
                   {checkIn && checkOut ? "Prenota Ora" : "Seleziona le Date"}
                 </Button>
@@ -179,6 +239,127 @@ const VillaCalendar = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal Prenotazione */}
+      <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Completa la tua prenotazione</DialogTitle>
+          </DialogHeader>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleBookingSubmit)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium">Check-in</p>
+                  <p className="text-sm text-muted-foreground">{checkIn?.toLocaleDateString('it-IT')}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Check-out</p>
+                  <p className="text-sm text-muted-foreground">{checkOut?.toLocaleDateString('it-IT')}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Ospiti</p>
+                  <p className="text-sm text-muted-foreground">{guests}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Totale</p>
+                  <p className="text-lg font-bold text-primary">€{calculateTotalPrice()}</p>
+                </div>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="guest_name"
+                rules={{ required: "Nome e cognome richiesti" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome e Cognome *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Mario Rossi" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="guest_email"
+                rules={{ 
+                  required: "Email richiesta",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Email non valida"
+                  }
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email *</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="mario@email.com" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="guest_phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Telefono</FormLabel>
+                    <FormControl>
+                      <Input placeholder="+39 123 456 7890" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="special_requests"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Richieste Speciali</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Eventuali richieste particolari..." 
+                        rows={3}
+                        {...field} 
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsBookingModalOpen(false)}
+                  className="flex-1"
+                >
+                  Annulla
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={isLoading}
+                  className="flex-1"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Prenotando...
+                    </>
+                  ) : (
+                    "Conferma Prenotazione"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
