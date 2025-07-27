@@ -37,11 +37,11 @@ const VillaContact = () => {
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="text-gradient">Realizza</span> il Tuo Sogno
+            <span className="text-gradient">Contattaci</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Contattaci per scoprire quanto è semplice partire e vivere la vacanza che meriti. 
-            Il tuo rifugio in Kenya ti aspetta.
+            Siamo qui per aiutarti a organizzare la tua vacanza perfetta in Kenya.
+            Il tuo rifugio tropicale ti aspetta.
           </p>
         </div>
         

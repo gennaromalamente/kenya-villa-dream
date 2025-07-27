@@ -93,7 +93,7 @@ const Footer = () => {
         </div>
 
         {/* Main Footer Content */}
-        <div className="py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Villa Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
@@ -156,27 +156,6 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Link Utili */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-lg">Link Utili</h4>
-            <div className="space-y-3">
-              <a href="/galleria" className="block text-background/80 hover:text-background transition-colors">
-                Galleria Foto
-              </a>
-              <a href="/calendario" className="block text-background/80 hover:text-background transition-colors">
-                Calendario Disponibilità
-              </a>
-              <a href="/servizi" className="block text-background/80 hover:text-background transition-colors">
-                Tutti i Servizi
-              </a>
-              <a href="/recensioni" className="block text-background/80 hover:text-background transition-colors">
-                Recensioni Ospiti
-              </a>
-              <a href="/faq" className="block text-background/80 hover:text-background transition-colors">
-                Domande Frequenti
-              </a>
-            </div>
-          </div>
 
           {/* Hosting Partner */}
           <div className="space-y-4">
