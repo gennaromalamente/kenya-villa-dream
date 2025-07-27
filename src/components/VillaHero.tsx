@@ -8,7 +8,7 @@ const VillaHero = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `url(${villaHero})`,
+          backgroundImage: `url(/lovable-uploads/6a0ff0a7-6bc3-45a4-9938-19bbdaece808.png)`,
         }}
       />
       <div className="absolute inset-0 bg-black/30" />
