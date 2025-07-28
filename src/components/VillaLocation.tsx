@@ -9,7 +9,7 @@ const VillaLocation = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="animate-fade-in-up">
             <h2 className="text-4xl md:text-5xl font-bold mb-8">
-              <span className="text-gradient">Posizione</span> da Sogno
+              <span className="text-gradient">Posizione</span> Privilegiata
             </h2>
             
             <div className="space-y-6 mb-8">

@@ -24,8 +24,8 @@ const features = [
   },
   {
     icon: <Utensils className="w-8 h-8" />,
-    title: "Cucina Completa",
-    description: "Cucina attrezzata per preparare i tuoi piatti preferiti"
+    title: "Area Cucina",
+    description: "Una cucina attrezzata per preparare, o far preparare da uno chef privato, i tuoi piatti preferiti"
   },
   {
     icon: <Wifi className="w-8 h-8" />,

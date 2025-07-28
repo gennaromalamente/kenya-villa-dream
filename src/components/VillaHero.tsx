@@ -18,7 +18,7 @@ const VillaHero = () => {
           <div className="floating-element mb-8">
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
               La Tua Villa da Sogno
-              <span className="block text-gradient text-4xl md:text-6xl mt-2">
+              <span className="block text-white text-4xl md:text-6xl mt-2">
                 in Kenya
               </span>
             </h1>
