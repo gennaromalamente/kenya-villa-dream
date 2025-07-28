@@ -32,6 +32,54 @@ export type Database = {
         }
         Relationships: []
       }
+      bookings: {
+        Row: {
+          booking_status: string
+          check_in_date: string
+          check_out_date: string
+          created_at: string
+          guest_email: string
+          guest_name: string
+          guest_phone: string | null
+          id: string
+          number_of_guests: number
+          special_requests: string | null
+          total_nights: number
+          total_price: number
+          updated_at: string
+        }
+        Insert: {
+          booking_status?: string
+          check_in_date: string
+          check_out_date: string
+          created_at?: string
+          guest_email: string
+          guest_name: string
+          guest_phone?: string | null
+          id?: string
+          number_of_guests?: number
+          special_requests?: string | null
+          total_nights: number
+          total_price: number
+          updated_at?: string
+        }
+        Update: {
+          booking_status?: string
+          check_in_date?: string
+          check_out_date?: string
+          created_at?: string
+          guest_email?: string
+          guest_name?: string
+          guest_phone?: string | null
+          id?: string
+          number_of_guests?: number
+          special_requests?: string | null
+          total_nights?: number
+          total_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
