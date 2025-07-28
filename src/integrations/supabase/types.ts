@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string | null
+          id: string
+          password_hash: string
+          updated_at: string | null
+          username: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          password_hash: string
+          updated_at?: string | null
+          username: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          password_hash?: string
+          updated_at?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
       availability: {
         Row: {
           date: string
@@ -34,6 +58,7 @@ export type Database = {
       }
       bookings: {
         Row: {
+          booking_reference: string | null
           booking_status: string
           check_in_date: string
           check_out_date: string
@@ -49,6 +74,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          booking_reference?: string | null
           booking_status?: string
           check_in_date: string
           check_out_date: string
@@ -64,6 +90,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          booking_reference?: string | null
           booking_status?: string
           check_in_date?: string
           check_out_date?: string
