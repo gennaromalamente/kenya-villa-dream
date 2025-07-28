@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -26,11 +26,33 @@ const VillaCalendar = () => {
   const [guests, setGuests] = useState(2);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
   const { toast } = useToast();
   
   const form = useForm<BookingFormData>();
 
   const pricePerNight = 180; // €180 per notte
+
+  // Load unavailable dates from database
+  useEffect(() => {
+    const loadAvailability = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('availability')
+          .select('date, is_available')
+          .eq('is_available', false);
+
+        if (error) throw error;
+
+        const unavailable = data?.map(item => new Date(item.date)) || [];
+        setUnavailableDates(unavailable);
+      } catch (error) {
+        console.error('Error loading availability:', error);
+      }
+    };
+
+    loadAvailability();
+  }, []);
   
   const calculateTotalPrice = () => {
     if (!checkIn || !checkOut) return 0;
@@ -44,13 +66,6 @@ const VillaCalendar = () => {
     const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
-
-  // Date non disponibili (esempio)
-  const unavailableDates = [
-    new Date(2024, 7, 15), // 15 agosto
-    new Date(2024, 7, 16), // 16 agosto
-    new Date(2024, 11, 25), // 25 dicembre
-  ];
 
   const isDateUnavailable = (date: Date) => {
     return unavailableDates.some(unavailableDate => 
@@ -87,6 +102,15 @@ const VillaCalendar = () => {
       setCheckIn(undefined);
       setCheckOut(undefined);
       setGuests(2);
+      
+      // Reload availability after booking
+      const { data: availabilityData } = await supabase
+        .from('availability')
+        .select('date, is_available')
+        .eq('is_available', false);
+      
+      const unavailable = availabilityData?.map(item => new Date(item.date)) || [];
+      setUnavailableDates(unavailable);
     } catch (error) {
       console.error('Booking error:', error);
       toast({

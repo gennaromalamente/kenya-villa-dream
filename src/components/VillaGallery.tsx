@@ -26,12 +26,6 @@ const galleryImages = [
   },
   // Esterni
   {
-    src: "/lovable-uploads/e4c176d8-b0ea-45c7-aa9e-188efad701b1.png",
-    title: "Veranda Vista Mare",
-    description: "La terrazza principale offre una vista mozzafiato che abbraccia l'oceano. Veranda panoramica sulla spiaggia di sabbia bianca, un panorama che cambia con le ore del giorno, sempre spettacolare.",
-    category: "esterni"
-  },
-  {
     src: "/lovable-uploads/65d4f2f3-cb6a-4281-913b-1a5346bab970.png",
     title: "Architettura Coloniale",
     description: "Eleganza e autenticità si incontrano in questa villa gialla. Architettura coloniale circondata da palme e vegetazione tropicale, perfettamente integrata nella natura keniota.",
