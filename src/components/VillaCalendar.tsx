@@ -78,6 +78,16 @@ const VillaCalendar = () => {
     
     setIsLoading(true);
     try {
+      console.log('Sending booking request:', {
+        guest_name: data.guest_name,
+        guest_email: data.guest_email,
+        guest_phone: data.guest_phone,
+        check_in: checkIn.toISOString().split('T')[0],
+        check_out: checkOut.toISOString().split('T')[0],
+        guests_count: guests,
+        special_requests: data.special_requests,
+      });
+
       const { data: result, error } = await supabase.functions.invoke('booking-system', {
         body: {
           guest_name: data.guest_name,
@@ -90,11 +100,13 @@ const VillaCalendar = () => {
         }
       });
 
+      console.log('Booking response:', result, error);
+
       if (error) throw error;
 
       toast({
         title: "Prenotazione confermata!",
-        description: `La tua prenotazione è stata registrata con successo. ID: ${result.booking_id}`,
+        description: `La tua prenotazione è stata registrata con successo. ID: ${result?.booking_id}`,
       });
       
       setIsBookingModalOpen(false);
@@ -111,11 +123,11 @@ const VillaCalendar = () => {
       
       const unavailable = availabilityData?.map(item => new Date(item.date)) || [];
       setUnavailableDates(unavailable);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Booking error:', error);
       toast({
         title: "Errore nella prenotazione",
-        description: "Si è verificato un errore. Riprova più tardi.",
+        description: error?.message || "Si è verificato un errore. Riprova più tardi.",
         variant: "destructive",
       });
     } finally {
@@ -124,18 +136,18 @@ const VillaCalendar = () => {
   };
 
   return (
-    <section className="py-20 px-6 bg-gradient-to-r from-primary/5 to-accent/5">
+    <section className="py-12 sm:py-20 px-4 sm:px-6 bg-gradient-to-r from-primary/5 to-accent/5">
       <div className="container mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+        <div className="text-center mb-12 sm:mb-16">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
             <span className="text-gradient">Calendario & Prenotazioni</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
             Verifica la disponibilità e prenota il tuo soggiorno nella nostra villa
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
           {/* Calendario Check-in */}
           <Card className="hover-lift">
             <CardHeader>

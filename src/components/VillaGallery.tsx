@@ -24,6 +24,36 @@ const galleryImages = [
     description: "Un rifugio di pace e comfort dove risvegliarsi ogni mattina è un piacere. Camera con pavimento in Galana e lavorazioni tipiche africane, design raffinato per notti di autentico relax.",
     category: "interni"
   },
+  {
+    src: "/lovable-uploads/3dfd2cb6-5e4f-41b2-8e00-1ae7f72551b0.png",
+    title: "Doppia Altezza",
+    description: "Vista mozzafiato degli interni con soffitti alti e design moderno. Scale eleganti e spazi aperti che uniscono funzionalità e bellezza architettonica in perfetta armonia.",
+    category: "interni"
+  },
+  {
+    src: "/lovable-uploads/8d51f039-877c-4179-aaef-3d41924043e0.png",
+    title: "Living Principale",
+    description: "Il cuore pulsante della villa con arredi tradizionali e tessuti colorati. Spazio luminoso perfetto per socializzare, con ventilatori a soffitto e design tipicamente africano.",
+    category: "interni"
+  },
+  {
+    src: "/lovable-uploads/21648dd1-2992-453e-a5cf-5981d0f35391.png",
+    title: "Area Relax Superiore",
+    description: "Spazio intimo al piano superiore per momenti di relax. Arredi comodi con tessuti dai colori caldi e vista panoramica, perfetto per letture e conversazioni.",
+    category: "interni"
+  },
+  {
+    src: "/lovable-uploads/0eb7cee0-00f3-43e6-bf34-0ff410bcfdd7.png",
+    title: "Soggiorno Piano Alto",
+    description: "Area sociale al piano superiore con vista sul giardino. Mobili in legno massello e tessuti africani creano un ambiente accogliente e raffinato.",
+    category: "interni"
+  },
+  {
+    src: "/lovable-uploads/4e6f663f-cf98-4f7f-b455-5c217e8c83e1.png",
+    title: "Bagno Principale",
+    description: "Bagno elegante con doppio lavabo e specchi con cornice in legno. Design pulito e funzionale con materiali di qualità e attenzione ai dettagli.",
+    category: "interni"
+  },
   // Esterni
   {
     src: "/lovable-uploads/65d4f2f3-cb6a-4281-913b-1a5346bab970.png",
@@ -41,6 +71,18 @@ const galleryImages = [
     src: "/lovable-uploads/7c90a53a-f01f-4c57-9f34-90dfa2c6ca46.png",
     title: "Area Relax Giardino",
     description: "Spazi perfetti per il relax all'aperto, letture sotto l'ombra e momenti di pace nella natura. Lettini comodi nel giardino tropicale per momenti di puro benessere.",
+    category: "esterni"
+  },
+  {
+    src: "/lovable-uploads/cb5b8d67-1b52-4ca7-9f4a-41fe98ab4c09.png",
+    title: "Veranda Vista Giardino",
+    description: "Veranda coperta con vista sul giardino tropicale. Vialetti in pietra naturale conducono attraverso la vegetazione lussureggiante, creando un ambiente di pace assoluta.",
+    category: "esterni"
+  },
+  {
+    src: "/lovable-uploads/05c3c364-3f5a-4f91-8c0f-3dd0081a2fe9.png",
+    title: "Giardino Tropicale",
+    description: "Immersa nella natura incontaminata del Kenya. Palme, alberi secolari e prati curati creano un paradiso verde dove rilassarsi e godersi la bellezza naturale.",
     category: "esterni"
   }
 ];
@@ -99,7 +141,7 @@ const VillaGallery = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-12">
           {filteredImages.map((image, index) => (
             <Dialog key={index} open={isDialogOpen && selectedImage === index} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
@@ -115,12 +157,12 @@ const VillaGallery = () => {
                       <img 
                         src={image.src} 
                         alt={image.title}
-                        className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="w-full h-48 sm:h-56 md:h-64 object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-                        <div className="p-4 text-white">
-                          <h3 className="font-semibold text-lg mb-1">{image.title}</h3>
-                          <p className="text-sm text-white/90 line-clamp-2">{image.description}</p>
+                        <div className="p-3 sm:p-4 text-white">
+                          <h3 className="font-semibold text-base sm:text-lg mb-1">{image.title}</h3>
+                          <p className="text-xs sm:text-sm text-white/90 line-clamp-2">{image.description}</p>
                         </div>
                       </div>
                     </div>
