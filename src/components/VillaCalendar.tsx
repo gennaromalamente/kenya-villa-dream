@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CalendarDays, Euro, Users, Clock, Loader2 } from "lucide-react";
+import PaymentForm from "./PaymentForm";
 
 interface BookingFormData {
   guest_name: string;
@@ -27,6 +28,8 @@ const VillaCalendar = () => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [currentBookingId, setCurrentBookingId] = useState<string>("");
   const { toast } = useToast();
   
   const form = useForm<BookingFormData>();
@@ -105,15 +108,13 @@ const VillaCalendar = () => {
       if (error) throw error;
 
       toast({
-        title: "Prenotazione confermata!",
-        description: `La tua prenotazione è stata registrata con successo. ID: ${result?.booking_id}`,
+        title: "Prenotazione registrata!",
+        description: `Procedi ora con il pagamento per confermare.`,
       });
       
+      setCurrentBookingId(result?.booking_id || "");
       setIsBookingModalOpen(false);
-      form.reset();
-      setCheckIn(undefined);
-      setCheckOut(undefined);
-      setGuests(2);
+      setShowPaymentForm(true);
       
       // Reload availability after booking
       const { data: availabilityData } = await supabase
@@ -396,6 +397,42 @@ const VillaCalendar = () => {
           </Form>
         </DialogContent>
       </Dialog>
+
+      {/* Payment Form Modal */}
+      {showPaymentForm && (
+        <Dialog open={showPaymentForm} onOpenChange={setShowPaymentForm}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Completa il Pagamento</DialogTitle>
+            </DialogHeader>
+            <PaymentForm
+              amount={calculateTotalPrice()}
+              currency="EUR"
+              bookingId={currentBookingId}
+              onSuccess={(transactionId) => {
+                console.log("Payment successful:", transactionId);
+                setShowPaymentForm(false);
+                form.reset();
+                setCheckIn(undefined);
+                setCheckOut(undefined);
+                setGuests(2);
+                toast({
+                  title: "Pagamento completato!",
+                  description: "La prenotazione è stata confermata con successo!",
+                });
+              }}
+              onError={(error) => {
+                console.error("Payment error:", error);
+                toast({
+                  title: "Errore pagamento",
+                  description: error,
+                  variant: "destructive",
+                });
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </section>
   );
 };
