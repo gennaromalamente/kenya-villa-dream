@@ -26,16 +26,26 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    // For guest checkouts, use a default user ID
+    let user_id = "guest";
+    let user_email = "guest@example.com";
+    
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
+    if (authHeader && authHeader !== "Bearer ") {
+      try {
+        const token = authHeader.replace("Bearer ", "");
+        const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+        if (!userError && userData.user) {
+          user_id = userData.user.id;
+          user_email = userData.user.email || "guest@example.com";
+        }
+      } catch (error) {
+        // Continue as guest if auth fails
+        console.log("Auth failed, continuing as guest:", error);
+      }
+    }
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
-    const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated");
-
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    logStep("User authenticated", { userId: user_id, email: user_email });
 
     const { amount, currency, booking_id, payment_method } = await req.json();
 
@@ -91,7 +101,7 @@ serve(async (req) => {
     const { error: transactionError } = await supabaseClient
       .from("transactions")
       .insert({
-        user_id: user.id,
+        user_id: user_id === "guest" ? null : user_id,
         booking_id,
         amount,
         currency: currency || 'EUR',
