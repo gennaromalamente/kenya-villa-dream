@@ -5,6 +5,13 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 const galleryImages = [
+  // Nuova foto caricata
+  {
+    src: "/lovable-uploads/43f1abf4-a73b-4fa5-8d64-d8445f573a35.png",
+    title: "Vista Mare Spettacolare",
+    description: "Una vista mozzafiato sul mare cristallino con barche all'orizzonte. Il perfetto connubio tra relax e bellezza naturale che caratterizza la nostra location esclusiva.",
+    category: "esterni"
+  },
   // Interni
   {
     src: "/lovable-uploads/383e09f1-942a-48d4-8193-b09a46867114.png",
@@ -141,7 +148,51 @@ const VillaGallery = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-12">
+        {/* Foto principale con frecce di navigazione */}
+        <div className="mb-12 relative animate-fade-in">
+          <Card className="overflow-hidden max-w-4xl mx-auto">
+            <CardContent className="p-0">
+              <div className="relative">
+                <img 
+                  src={filteredImages[selectedImage]?.src} 
+                  alt={filteredImages[selectedImage]?.title}
+                  className="w-full h-[60vh] object-cover"
+                />
+                
+                {/* Frecce di navigazione */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white hover:bg-black/70 transition-all duration-300"
+                  onClick={prevImage}
+                >
+                  <ChevronLeft className="h-8 w-8" />
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white hover:bg-black/70 transition-all duration-300"
+                  onClick={nextImage}
+                >
+                  <ChevronRight className="h-8 w-8" />
+                </Button>
+
+                {/* Overlay con titolo e descrizione */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                  <h3 className="text-2xl font-bold text-white mb-2">
+                    {filteredImages[selectedImage]?.title}
+                  </h3>
+                  <p className="text-white/90 text-lg leading-relaxed">
+                    {filteredImages[selectedImage]?.description}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-12 animate-fade-in">
           {filteredImages.map((image, index) => (
             <Dialog key={index} open={isDialogOpen && selectedImage === index} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>

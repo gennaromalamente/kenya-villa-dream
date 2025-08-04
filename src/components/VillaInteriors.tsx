@@ -6,7 +6,18 @@ const VillaInteriors = () => {
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <div className="space-y-6">
+          <div className="relative animate-fade-in">
+            <Card className="overflow-hidden hover-scale">
+              <CardContent className="p-0">
+                <img
+                  src="https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=600&h=400&fit=crop"
+                  alt="Interni della villa"
+                  className="w-full h-[400px] object-cover transition-transform duration-500"
+                />
+              </CardContent>
+            </Card>
+          </div>
+          <div className="space-y-6 animate-fade-in">
             <h2 className="text-3xl md:text-4xl font-bold text-primary">
               Interni
             </h2>
@@ -20,21 +31,10 @@ const VillaInteriors = () => {
             </div>
             <Button 
               variant="outline" 
-              className="mt-6"
+              className="mt-6 hover-scale"
             >
               Scopri i dettagli
             </Button>
-          </div>
-          <div className="relative">
-            <Card className="overflow-hidden">
-              <CardContent className="p-0">
-                <img
-                  src="https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=600&h=400&fit=crop"
-                  alt="Interni della villa"
-                  className="w-full h-[400px] object-cover"
-                />
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
