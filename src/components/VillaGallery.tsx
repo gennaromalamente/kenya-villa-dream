@@ -5,13 +5,6 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 const galleryImages = [
-  // Nuova foto caricata
-  {
-    src: "/lovable-uploads/43f1abf4-a73b-4fa5-8d64-d8445f573a35.png",
-    title: "Vista Mare Spettacolare",
-    description: "Una vista mozzafiato sul mare cristallino con barche all'orizzonte. Il perfetto connubio tra relax e bellezza naturale che caratterizza la nostra location esclusiva.",
-    category: "esterni"
-  },
   // Interni
   {
     src: "/lovable-uploads/383e09f1-942a-48d4-8193-b09a46867114.png",

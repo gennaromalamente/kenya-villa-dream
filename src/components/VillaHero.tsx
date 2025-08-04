@@ -1,17 +1,47 @@
 import { Button } from "@/components/ui/button";
-import { MapPin, Home, Users } from "lucide-react";
+import { MapPin, Home, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import villaHero from "@/assets/villa-hero.jpg";
+import { useState } from "react";
 
 const VillaHero = () => {
+  const [currentImage, setCurrentImage] = useState(0);
+  const images = [
+    "/lovable-uploads/6a0ff0a7-6bc3-45a4-9938-19bbdaece808.png",
+    "/lovable-uploads/43f1abf4-a73b-4fa5-8d64-d8445f573a35.png"
+  ];
+
+  const nextImage = () => {
+    setCurrentImage((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
+  };
+
   return (
     <section className="villa-hero relative pt-16">
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-500"
         style={{
-          backgroundImage: `url(/lovable-uploads/6a0ff0a7-6bc3-45a4-9938-19bbdaece808.png)`,
+          backgroundImage: `url(${images[currentImage]})`,
         }}
       />
       <div className="absolute inset-0 bg-black/30" />
+      
+      {/* Navigation Arrows */}
+      <button
+        onClick={prevImage}
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 rounded-full p-3 transition-all duration-200"
+      >
+        <ChevronLeft className="w-6 h-6 text-white" />
+      </button>
+      
+      <button
+        onClick={nextImage}
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 rounded-full p-3 transition-all duration-200"
+      >
+        <ChevronRight className="w-6 h-6 text-white" />
+      </button>
       
       <div className="relative z-10 container mx-auto px-6 text-center">
         <div className="max-w-4xl mx-auto animate-fade-in-up">
