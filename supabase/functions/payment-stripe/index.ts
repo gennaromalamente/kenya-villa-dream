@@ -62,20 +62,31 @@ serve(async (req) => {
       apiVersion: "2023-10-16",
     });
 
-    // Create payment intent
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // Convert to cents
-      currency: currency || 'eur',
-      automatic_payment_methods: {
-        enabled: true,
-      },
+    // Create checkout session
+    const session = await stripe.checkout.sessions.create({
+      customer_email: user_email,
+      line_items: [
+        {
+          price_data: {
+            currency: currency || 'eur',
+            product_data: {
+              name: `Prenotazione Villa - ${booking_id}`,
+            },
+            unit_amount: Math.round(amount * 100), // Convert to cents
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${req.headers.get("origin") || "https://qivroruezcxdnueuojkg.supabase.co"}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.get("origin") || "https://qivroruezcxdnueuojkg.supabase.co"}/payment-cancel`,
       metadata: {
         booking_id,
         user_id: user_id,
       },
     });
 
-    logStep("Stripe payment intent created", { paymentIntentId: paymentIntent.id });
+    logStep("Stripe checkout session created", { sessionId: session.id });
 
     // Create transaction record
     const { error: transactionError } = await supabaseClient
@@ -87,9 +98,9 @@ serve(async (req) => {
         currency: currency || 'EUR',
         payment_method: payment_method || 'stripe',
         payment_provider: 'stripe',
-        transaction_id: paymentIntent.id,
+        transaction_id: session.id,
         status: 'pending',
-        metadata: { payment_intent_id: paymentIntent.id }
+        metadata: { session_id: session.id }
       });
 
     if (transactionError) {
@@ -100,8 +111,8 @@ serve(async (req) => {
     logStep("Transaction created successfully");
 
     return new Response(JSON.stringify({
-      client_secret: paymentIntent.client_secret,
-      payment_intent_id: paymentIntent.id
+      url: session.url,
+      session_id: session.id
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
