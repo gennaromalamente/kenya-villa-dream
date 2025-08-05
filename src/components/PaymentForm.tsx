@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CreditCard, Wallet, Building2, Bitcoin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { loadStripe } from "@stripe/stripe-js";
 
 interface PaymentFormProps {
   amount: number;
@@ -54,23 +55,18 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
       if (error) throw error;
 
-      if (data.client_secret) {
-        // Redirect to Stripe Checkout
-        const stripe = await import('https://js.stripe.com/v3/');
-        const stripeInstance = stripe.default('pk_test_...');
-        
-        // For now, we'll open the Payment Intent in a new window
-        // In production, you should integrate Stripe Elements properly
-        window.open(`https://checkout.stripe.com/pay/${data.client_secret}`, '_blank');
+      if (data.url) {
+        // Redirect to Stripe Checkout session
+        window.open(data.url, '_blank');
         
         toast({
           title: "Reindirizzamento Stripe",
           description: "Verrai reindirizzato a Stripe per completare il pagamento.",
         });
         
-        onSuccess(data.payment_intent_id);
+        onSuccess(data.session_id);
       } else {
-        throw new Error('Errore nella creazione del pagamento');
+        throw new Error('Errore nella creazione della sessione di pagamento');
       }
     } catch (error) {
       console.error('Stripe payment error:', error);
