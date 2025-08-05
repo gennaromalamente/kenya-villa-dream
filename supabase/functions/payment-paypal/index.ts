@@ -56,14 +56,39 @@ serve(async (req) => {
 
     logStep("Payment request", { amount, currency, booking_id, payment_method });
 
-    // Get PayPal access token
-    const paypalClientId = Deno.env.get("PAYPAL");
-    if (!paypalClientId) {
+    // Get PayPal credentials
+    const paypalCredentials = Deno.env.get("PAYPAL");
+    if (!paypalCredentials) {
       throw new Error("PayPal credentials not configured");
+    }
+
+    // Parse PayPal credentials (expected format: "client_id:client_secret")
+    const [clientId, clientSecret] = paypalCredentials.split(":");
+    if (!clientId || !clientSecret) {
+      throw new Error("PayPal credentials must be in format: client_id:client_secret");
     }
 
     // For sandbox testing, use sandbox endpoints
     const paypalBaseUrl = "https://api.sandbox.paypal.com";
+    
+    // Get access token from PayPal
+    const authResponse = await fetch(`${paypalBaseUrl}/v1/oauth2/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+      },
+      body: "grant_type=client_credentials"
+    });
+
+    if (!authResponse.ok) {
+      throw new Error(`PayPal auth error: ${authResponse.statusText}`);
+    }
+
+    const authData = await authResponse.json();
+    const accessToken = authData.access_token;
+    
+    logStep("PayPal access token obtained");
 
     // Create PayPal order
     const paypalOrder = {
@@ -71,7 +96,7 @@ serve(async (req) => {
       purchase_units: [{
         amount: {
           currency_code: currency || 'EUR',
-          value: amount.toString()
+          value: (amount / 100).toFixed(2) // Convert cents to euros
         },
         reference_id: booking_id
       }],
@@ -85,7 +110,7 @@ serve(async (req) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${paypalClientId}`,
+        "Authorization": `Bearer ${accessToken}`,
       },
       body: JSON.stringify(paypalOrder)
     });

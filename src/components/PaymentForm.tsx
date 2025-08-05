@@ -78,7 +78,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     try {
       const { data, error } = await supabase.functions.invoke('payment-paypal', {
         body: {
-          amount,
+          amount: Math.round(amount * 100), // Convert to cents for backend
           currency,
           booking_id: bookingId,
           payment_method: 'paypal'
