@@ -54,14 +54,24 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
       if (error) throw error;
 
-      // In a real implementation, you would use Stripe Elements here
-      // For now, we'll simulate successful payment
-      toast({
-        title: "Pagamento elaborato",
-        description: "Il pagamento con carta è stato elaborato con successo.",
-      });
-      
-      onSuccess(data.payment_intent_id);
+      if (data.client_secret) {
+        // Redirect to Stripe Checkout
+        const stripe = await import('https://js.stripe.com/v3/');
+        const stripeInstance = stripe.default('pk_test_...');
+        
+        // For now, we'll open the Payment Intent in a new window
+        // In production, you should integrate Stripe Elements properly
+        window.open(`https://checkout.stripe.com/pay/${data.client_secret}`, '_blank');
+        
+        toast({
+          title: "Reindirizzamento Stripe",
+          description: "Verrai reindirizzato a Stripe per completare il pagamento.",
+        });
+        
+        onSuccess(data.payment_intent_id);
+      } else {
+        throw new Error('Errore nella creazione del pagamento');
+      }
     } catch (error) {
       console.error('Stripe payment error:', error);
       onError(`Errore pagamento Stripe: ${error.message}`);
