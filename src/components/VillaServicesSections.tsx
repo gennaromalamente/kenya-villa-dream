@@ -23,13 +23,7 @@ const VillaServicesSections = () => {
             </h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                A <strong>Villa Le Ginepraie</strong> tutte le esperienze e tutti i servizi sono personalizzati. Il proprietario <strong>Valerio</strong> è a tua disposizione, perché vive proprio a fianco.
-              </p>
-              <p>
-                Potrai chiedere la <strong>spesa a domicilio</strong>, ma anche uno <strong>chef</strong> e un <strong>pizzaiolo</strong> dedicati. Oltre ai servizi che tipicamente trovi in Toscana, puoi chiedere <strong>massaggi</strong>, lezioni di <strong>yoga</strong>, lezioni di <strong>respirazione</strong>, tutto sempre individualizzato e adattato alle tue esigenze.
-              </p>
-              <p>
-                Inoltre, ti sarà proposto uno sguardo diverso e creativo sulla fauna e flora locali, e altre particolarità.
+                Le nostre Ville in Kenya sono pensate per chi cerca un rifugio esclusivo, dove ogni dettaglio può essere personalizzato. Dalla magia di una cena preparata dal tuo chef privato, al relax di massaggi rigeneranti direttamente in villa, fino all'emozione di un tour privato nella savana africana: ogni esperienza è creata su misura per te.
               </p>
             </div>
             <Button 
