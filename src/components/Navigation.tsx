@@ -25,7 +25,7 @@ const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const services = [
-    { name: "Servizio Navetta", icon: <MapPin className="w-4 h-4" />, price: "" },
+    { name: "Safari privato", icon: <MapPin className="w-4 h-4" />, price: "", link: "/safari-guide" },
     { name: "Chef Personale con Open Bar", icon: <Settings className="w-4 h-4" />, price: "" },
     { name: "Tuk Tuk con Autista Privato", icon: <MapPin className="w-4 h-4" />, price: "" },
   ];
@@ -74,7 +74,11 @@ const Navigation = () => {
                 <NavigationMenuContent>
                   <div className="grid gap-3 p-6 w-[350px]">
                     {services.map((service, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 rounded-lg hover:bg-accent/10 transition-colors">
+                      <div 
+                        key={index} 
+                        className="flex items-center justify-between p-3 rounded-lg hover:bg-accent/10 transition-colors cursor-pointer"
+                        onClick={() => service.link && (window.location.href = service.link)}
+                      >
                         <div className="flex items-center space-x-3">
                           {service.icon}
                           <span className="text-sm">{service.name}</span>
@@ -151,7 +155,11 @@ const Navigation = () => {
                 <div className="pt-4 border-t border-border">
                   <div className="text-lg font-semibold text-foreground mb-4">Servizi Aggiuntivi</div>
                   {services.map((service, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 rounded-lg hover:bg-accent/10 transition-colors">
+                    <div 
+                      key={index} 
+                      className="flex items-center justify-between p-3 rounded-lg hover:bg-accent/10 transition-colors cursor-pointer"
+                      onClick={() => service.link && (window.location.href = service.link)}
+                    >
                       <div className="flex items-center space-x-3">
                         {service.icon}
                         <span className="text-sm">{service.name}</span>
