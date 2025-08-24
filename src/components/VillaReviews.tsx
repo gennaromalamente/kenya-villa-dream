@@ -15,7 +15,11 @@ interface Review {
   created_at: string;
 }
 
-const VillaReviews = () => {
+interface VillaReviewsProps {
+  id?: string;
+}
+
+const VillaReviews = ({ id }: VillaReviewsProps = {}) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,7 +38,7 @@ const VillaReviews = () => {
   const totalReviews = reviews.length;
 
   return (
-    <section className="py-20 px-6 bg-gradient-to-br from-accent/5 to-primary/10">
+    <section id={id} className="py-20 px-6 bg-gradient-to-br from-accent/5 to-primary/10">
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">

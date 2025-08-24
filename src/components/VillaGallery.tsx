@@ -87,7 +87,11 @@ const galleryImages = [
   }
 ];
 
-const VillaGallery = () => {
+interface VillaGalleryProps {
+  id?: string;
+}
+
+const VillaGallery = ({ id }: VillaGalleryProps = {}) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -105,7 +109,7 @@ const VillaGallery = () => {
   };
 
   return (
-    <section className="py-20 px-6 bg-gradient-to-br from-secondary/20 to-accent/10">
+    <section id={id} className="py-20 px-6 bg-gradient-to-br from-secondary/20 to-accent/10">
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">

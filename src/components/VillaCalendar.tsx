@@ -21,7 +21,11 @@ interface BookingFormData {
   special_requests?: string;
 }
 
-const VillaCalendar = () => {
+interface VillaCalendarProps {
+  id?: string;
+}
+
+const VillaCalendar = ({ id }: VillaCalendarProps = {}) => {
   const [checkIn, setCheckIn] = useState<Date>();
   const [checkOut, setCheckOut] = useState<Date>();
   const [guests, setGuests] = useState(2);
@@ -137,7 +141,7 @@ const VillaCalendar = () => {
   };
 
   return (
-    <section className="py-12 sm:py-20 px-4 sm:px-6 bg-gradient-to-r from-primary/5 to-accent/5">
+    <section id={id} className="py-12 sm:py-20 px-4 sm:px-6 bg-gradient-to-r from-primary/5 to-accent/5">
       <div className="container mx-auto">
         <div className="text-center mb-12 sm:mb-16">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
