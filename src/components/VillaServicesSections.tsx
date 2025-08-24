@@ -10,7 +10,7 @@ const VillaServicesSections = () => {
             <Card className="overflow-hidden hover-scale">
               <CardContent className="p-0">
                 <img
-                  src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&h=400&fit=crop"
+                  src="/lovable-uploads/c5ea7445-3228-40cd-b5c5-df6fd5f6f89d.png"
                   alt="Servizi della villa"
                   className="w-full h-[400px] object-cover transition-transform duration-500"
                 />
