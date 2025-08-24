@@ -1,4 +1,5 @@
 import Navigation from "@/components/Navigation";
+import SideMenu from "@/components/SideMenu";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ const SafariGuide = () => {
   return (
     <div className="min-h-screen">
       <Navigation />
+      <SideMenu />
       
       {/* Hero Section */}
       <section className="pt-20 pb-16 px-6 bg-gradient-to-br from-background to-accent/5">

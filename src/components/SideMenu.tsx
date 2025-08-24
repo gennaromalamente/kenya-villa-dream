@@ -19,11 +19,19 @@ const SideMenu = () => {
 
   const menuItems = [
     { name: "Galleria Foto", icon: <Image className="w-5 h-5" />, action: () => {
-      document.getElementById('gallery')?.scrollIntoView({ behavior: 'smooth' });
+      if (window.location.pathname === '/') {
+        document.getElementById('gallery')?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = '/#gallery';
+      }
       setIsOpen(false);
     }},
     { name: "Calendario Disponibilità", icon: <Calendar className="w-5 h-5" />, action: () => {
-      document.getElementById('calendar')?.scrollIntoView({ behavior: 'smooth' });
+      if (window.location.pathname === '/') {
+        document.getElementById('calendar')?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = '/#calendar';
+      }
       setIsOpen(false);
     }},
     { name: "Recensioni", icon: <Star className="w-5 h-5" />, action: () => {
@@ -56,7 +64,7 @@ const SideMenu = () => {
             <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-[300px] sm:w-[400px] bg-white">
+        <SheetContent side="left" className="w-[300px] sm:w-[400px] bg-gradient-to-br from-background via-background/95 to-background/90 backdrop-blur-md border-border/20">
           <div className="flex flex-col space-y-6 mt-8">
             {/* Logo */}
             <div className="flex items-center space-x-3 pb-4 border-b border-border">
