@@ -22,31 +22,31 @@ const safariServices = [
     icon: <Sunrise className="w-12 h-12" />,
     title: "Safari in mongolfiera",
     description: "Vola sopra la savana all'alba e ammira il paesaggio africano da una prospettiva unica e mozzafiato.",
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop"
+    image: "/lovable-uploads/03947891-7e2a-4847-8d2f-6189280eadcf.png"
   },
   {
     icon: <Ship className="w-12 h-12" />,
     title: "Safari in barca",
     description: "Naviga lungo i fiumi del Kenya per osservare ippopotami, coccodrilli e una ricca avifauna acquatica.",
-    image: "https://images.unsplash.com/photo-1605538883669-825200433431?w=600&h=400&fit=crop"
+    image: "/lovable-uploads/bd56312b-42ca-46ac-96f6-716edba7c837.png"
   },
   {
     icon: <Moon className="w-12 h-12" />,
     title: "Safari notturno",
     description: "Scopri la vita notturna della savana con guide esperte per incontrare i predatori e la fauna notturna.",
-    image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600&h=400&fit=crop"
+    image: "/lovable-uploads/737ef3f6-1fc7-4d90-874a-51ece143a5b4.png"
   },
   {
     icon: <Binoculars className="w-12 h-12" />,
     title: "Birdwatching",
     description: "Kenya ospita oltre 1.000 specie di uccelli. Scopri i magnifici aironi, fenicotteri e rapaci africani.",
-    image: "https://images.unsplash.com/photo-1551739440-5dd934d3a94a?w=600&h=400&fit=crop"
+    image: "/lovable-uploads/2a1cbcb5-bb1d-4bc2-80ea-d258e46f6b22.png"
   },
   {
     icon: <Mountain className="w-12 h-12" />,
     title: "Escursioni",
     description: "Camminate guidate nella natura per scoprire la flora locale, villaggi tradizionali e panorami spettacolari.",
-    image: "https://images.unsplash.com/photo-1515942661500-464c22d1b6e4?w=600&h=400&fit=crop"
+    image: "/lovable-uploads/8611adb6-e9e7-4433-b42a-c0ba558b7c48.png"
   }
 ];
 
