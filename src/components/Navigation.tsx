@@ -47,18 +47,18 @@ const Navigation = () => {
                 <NavigationMenuTrigger className="text-foreground">
                   Menu
                 </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="grid gap-3 p-6 w-[400px] lg:w-[500px]">
+                <NavigationMenuContent className="bg-white/95 backdrop-blur-md border shadow-lg z-50">
+                  <div className="grid gap-3 p-6 w-[400px] lg:w-[500px] bg-white rounded-lg">
                     <div className="grid gap-2">
-                      <button className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors">
+                      <button className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground">
                         <Image className="w-5 h-5 text-primary" />
                         <span>Galleria Foto</span>
                       </button>
-                      <button className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors">
+                      <button className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground">
                         <Calendar className="w-5 h-5 text-primary" />
                         <span>Calendario Disponibilità</span>
                       </button>
-                      <button className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors">
+                      <button className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground">
                         <Star className="w-5 h-5 text-primary" />
                         <span>Recensioni</span>
                       </button>
@@ -71,12 +71,12 @@ const Navigation = () => {
                 <NavigationMenuTrigger className="text-foreground">
                   Scopri tutti i Servizi
                 </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="grid gap-3 p-6 w-[350px]">
+                <NavigationMenuContent className="bg-white/95 backdrop-blur-md border shadow-lg z-50">
+                  <div className="grid gap-3 p-6 w-[350px] bg-white rounded-lg">
                     {services.map((service, index) => (
                       <div 
                         key={index} 
-                        className="flex items-center justify-between p-3 rounded-lg hover:bg-accent/10 transition-colors cursor-pointer"
+                        className="flex items-center justify-between p-3 rounded-lg hover:bg-accent/10 transition-colors cursor-pointer text-foreground"
                         onClick={() => service.link && (window.location.href = service.link)}
                       >
                         <div className="flex items-center space-x-3">
