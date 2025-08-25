@@ -58,8 +58,9 @@ serve(async (req) => {
 
     // Get PayPal credentials
     const paypalCredentials = Deno.env.get("PAYPAL");
+    logStep("PayPal credentials check", { hasCredentials: !!paypalCredentials });
     if (!paypalCredentials) {
-      throw new Error("PayPal credentials not configured");
+      throw new Error("PayPal credentials not configured - please add PAYPAL secret in format: client_id:client_secret");
     }
 
     // Parse PayPal credentials (expected format: "client_id:client_secret")
@@ -82,7 +83,9 @@ serve(async (req) => {
     });
 
     if (!authResponse.ok) {
-      throw new Error(`PayPal auth error: ${authResponse.statusText}`);
+      const errorText = await authResponse.text();
+      logStep("PayPal auth failed", { status: authResponse.status, statusText: authResponse.statusText, error: errorText });
+      throw new Error(`PayPal auth error: ${authResponse.status} ${authResponse.statusText} - ${errorText}`);
     }
 
     const authData = await authResponse.json();
@@ -116,7 +119,9 @@ serve(async (req) => {
     });
 
     if (!paypalResponse.ok) {
-      throw new Error(`PayPal API error: ${paypalResponse.statusText}`);
+      const errorText = await paypalResponse.text();
+      logStep("PayPal order creation failed", { status: paypalResponse.status, statusText: paypalResponse.statusText, error: errorText });
+      throw new Error(`PayPal API error: ${paypalResponse.status} ${paypalResponse.statusText} - ${errorText}`);
     }
 
     const paypalData = await paypalResponse.json();

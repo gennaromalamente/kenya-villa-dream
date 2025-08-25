@@ -12,6 +12,7 @@ import VillaReviews from "@/components/VillaReviews";
 import VillaCalendar from "@/components/VillaCalendar";
 import VillaContact from "@/components/VillaContact";
 import Footer from "@/components/Footer";
+import PayPalTest from "@/components/PayPalTest";
 
 const Index = () => {
   return (
@@ -29,6 +30,15 @@ const Index = () => {
       <VillaReviews id="reviews" />
       <VillaCalendar id="calendar" />
       <VillaContact />
+      
+      {/* PayPal Test Component - Remove this after testing */}
+      <section className="py-12 px-6 bg-muted/20">
+        <div className="container mx-auto">
+          <h2 className="text-2xl font-bold text-center mb-8">PayPal Integration Test</h2>
+          <PayPalTest />
+        </div>
+      </section>
+      
       <Footer />
     </div>
   );
