@@ -2,7 +2,6 @@ import Navigation from "@/components/Navigation";
 import SideMenu from "@/components/SideMenu";
 import VillaHero from "@/components/VillaHero";
 import VillaFeatures from "@/components/VillaFeatures";
-import VillaGallery from "@/components/VillaGallery";
 import VillaInteriors from "@/components/VillaInteriors";
 import VillaExteriors from "@/components/VillaExteriors";
 import VillaServicesSections from "@/components/VillaServicesSections";
@@ -21,7 +20,6 @@ const Index = () => {
       <SideMenu />
       <VillaHero />
       <VillaFeatures />
-      <VillaGallery id="gallery" />
       <VillaInteriors />
       <VillaExteriors />
       <VillaServicesSections />

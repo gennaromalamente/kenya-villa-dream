@@ -18,7 +18,8 @@ import {
   Image,
   Settings,
   Star,
-  Euro
+  Euro,
+  Home
 } from "lucide-react";
 
 const Navigation = () => {
@@ -47,21 +48,37 @@ const Navigation = () => {
                 <NavigationMenuTrigger className="text-foreground">
                   Menu
                 </NavigationMenuTrigger>
-                <NavigationMenuContent className="bg-white/95 backdrop-blur-md border shadow-lg z-50">
-                  <div className="grid gap-3 p-6 w-[400px] lg:w-[500px] bg-white rounded-lg">
-                    <div className="grid gap-2">
-                      <button className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground">
-                        <Image className="w-5 h-5 text-primary" />
-                        <span>Galleria Foto</span>
-                      </button>
-                      <button className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground">
-                        <Calendar className="w-5 h-5 text-primary" />
-                        <span>Calendario Disponibilità</span>
-                      </button>
-                      <button className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground">
-                        <Star className="w-5 h-5 text-primary" />
-                        <span>Recensioni</span>
-                      </button>
+                  <NavigationMenuContent className="bg-white/95 backdrop-blur-md border shadow-lg z-50">
+                   <div className="grid gap-3 p-6 w-[400px] lg:w-[500px] bg-white rounded-lg">
+                     <div className="grid gap-2">
+                       <button 
+                         className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground"
+                         onClick={() => window.location.href = '/'}
+                       >
+                         <Home className="w-5 h-5 text-primary" />
+                         <span>Home</span>
+                       </button>
+                       <button 
+                         className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground"
+                         onClick={() => window.location.href = '/gallery'}
+                       >
+                         <Image className="w-5 h-5 text-primary" />
+                         <span>Galleria Foto</span>
+                       </button>
+                       <button 
+                         className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground"
+                         onClick={() => document.getElementById('calendar')?.scrollIntoView({ behavior: 'smooth' })}
+                       >
+                         <Calendar className="w-5 h-5 text-primary" />
+                         <span>Calendario Disponibilità</span>
+                       </button>
+                       <button 
+                         className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground"
+                         onClick={() => document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' })}
+                       >
+                         <Star className="w-5 h-5 text-primary" />
+                         <span>Recensioni</span>
+                       </button>
                     </div>
                   </div>
                 </NavigationMenuContent>
@@ -134,23 +151,58 @@ const Navigation = () => {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-              <div className="flex flex-col space-y-4 mt-8">
-                <div className="text-lg font-semibold text-foreground mb-4">Menu Principale</div>
+               <div className="flex flex-col space-y-4 mt-8">
+                 <div className="text-lg font-semibold text-foreground mb-4">Menu Principale</div>
+                 
+                 <button 
+                   className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/10 transition-colors text-left"
+                   onClick={() => window.location.href = '/'}
+                 >
+                   <Home className="w-5 h-5 text-primary" />
+                   <span>Home</span>
+                 </button>
+                 
+                 <button 
+                   className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/10 transition-colors text-left"
+                   onClick={() => window.location.href = '/gallery'}
+                 >
+                   <Image className="w-5 h-5 text-primary" />
+                   <span>Galleria Foto</span>
+                 </button>
                 
-                <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/10 transition-colors text-left">
-                  <Image className="w-5 h-5 text-primary" />
-                  <span>Galleria Foto</span>
-                </button>
-                
-                <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/10 transition-colors text-left">
-                  <Calendar className="w-5 h-5 text-primary" />
-                  <span>Calendario Disponibilità</span>
-                </button>
+                 <button 
+                   className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/10 transition-colors text-left"
+                   onClick={() => {
+                     setIsOpen(false);
+                     setTimeout(() => {
+                       if (window.location.pathname !== '/') {
+                         window.location.href = '/#calendar';
+                       } else {
+                         document.getElementById('calendar')?.scrollIntoView({ behavior: 'smooth' });
+                       }
+                     }, 100);
+                   }}
+                 >
+                   <Calendar className="w-5 h-5 text-primary" />
+                   <span>Calendario Disponibilità</span>
+                 </button>
 
-                <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/10 transition-colors text-left">
-                  <Star className="w-5 h-5 text-primary" />
-                  <span>Recensioni</span>
-                </button>
+                 <button 
+                   className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/10 transition-colors text-left"
+                   onClick={() => {
+                     setIsOpen(false);
+                     setTimeout(() => {
+                       if (window.location.pathname !== '/') {
+                         window.location.href = '/#reviews';
+                       } else {
+                         document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' });
+                       }
+                     }, 100);
+                   }}
+                 >
+                   <Star className="w-5 h-5 text-primary" />
+                   <span>Recensioni</span>
+                 </button>
 
                 <div className="pt-4 border-t border-border">
                   <div className="text-lg font-semibold text-foreground mb-4">Servizi Aggiuntivi</div>
