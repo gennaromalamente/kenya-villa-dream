@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CreditCard, Wallet, Building2, Bitcoin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useErrorConsole } from "@/contexts/ErrorConsoleContext";
 import { loadStripe } from "@stripe/stripe-js";
 
 interface PaymentFormProps {
@@ -34,6 +35,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     name: ""
   });
   const { toast } = useToast();
+  const { addLog } = useErrorConsole();
 
   const paymentMethods = [
     { id: "stripe", name: "Carta di Credito/Debito", icon: CreditCard },
@@ -44,6 +46,12 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
   const handleStripePayment = async () => {
     try {
+      addLog('info', 'Stripe Payment', `Initiating Stripe payment for booking ${bookingId}`, {
+        amount,
+        currency,
+        booking_id: bookingId
+      });
+
       const { data, error } = await supabase.functions.invoke('payment-stripe', {
         body: {
           amount,
@@ -54,9 +62,15 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        addLog('error', 'Stripe Payment', 'Stripe function invocation failed', error);
+        throw error;
+      }
+
+      addLog('info', 'Stripe Payment', 'Stripe function response received', data);
 
       if (data.url) {
+        addLog('info', 'Stripe Payment', `Redirecting to Stripe checkout: ${data.url}`);
         // Redirect to Stripe Checkout session
         window.location.href = data.url;
         toast({
@@ -66,19 +80,29 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         
         onSuccess(data.session_id);
       } else {
-        throw new Error('Errore nella creazione della sessione di pagamento');
+        const errorMsg = 'Errore nella creazione della sessione di pagamento';
+        addLog('error', 'Stripe Payment', errorMsg, data);
+        throw new Error(errorMsg);
       }
     } catch (error) {
-      console.error('Stripe payment error:', error);
-      onError(`Errore pagamento Stripe: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      addLog('error', 'Stripe Payment', `Payment failed: ${errorMessage}`, error);
+      onError(`Errore pagamento Stripe: ${errorMessage}`);
     }
   };
 
   const handlePayPalPayment = async () => {
     try {
+      const amountInCents = Math.round(amount * 100);
+      addLog('info', 'PayPal Payment', `Initiating PayPal payment for booking ${bookingId}`, {
+        amount: amountInCents,
+        currency,
+        booking_id: bookingId
+      });
+
       const { data, error } = await supabase.functions.invoke('payment-paypal', {
         body: {
-          amount: Math.round(amount * 100), // Convert to cents for backend
+          amount: amountInCents, // Convert to cents for backend
           currency,
           booking_id: bookingId,
           payment_method: 'paypal',
@@ -86,25 +110,36 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        addLog('error', 'PayPal Payment', 'PayPal function invocation failed', error);
+        throw error;
+      }
+
+      addLog('info', 'PayPal Payment', 'PayPal function response received', data);
 
       // Redirect to PayPal approval URL
       if (data.approval_url) {
+        addLog('info', 'PayPal Payment', `Redirecting to PayPal: ${data.approval_url}`);
         window.location.href = data.approval_url;
         toast({
           title: "Reindirizzamento PayPal",
           description: "Verrai reindirizzato a PayPal per completare il pagamento.",
         });
+        onSuccess(data.order_id);
+      } else {
+        const errorMsg = 'PayPal approval URL not received';
+        addLog('error', 'PayPal Payment', errorMsg, data);
+        throw new Error(errorMsg);
       }
-      
-      onSuccess(data.order_id);
     } catch (error) {
-      console.error('PayPal payment error:', error);
-      onError(`Errore pagamento PayPal: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      addLog('error', 'PayPal Payment', `Payment failed: ${errorMessage}`, error);
+      onError(`Errore pagamento PayPal: ${errorMessage}`);
     }
   };
 
   const handleBankTransferPayment = () => {
+    addLog('info', 'Bank Transfer', 'Bank transfer payment initiated', { bookingId });
     // Show bank transfer details
     toast({
       title: "Bonifico Bancario",
@@ -114,6 +149,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   };
 
   const handleCryptoPayment = () => {
+    addLog('warning', 'Crypto Payment', 'Crypto payment attempted but not implemented', { bookingId });
     // Show crypto payment details
     toast({
       title: "Pagamento Criptovalute",
@@ -127,6 +163,12 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     setIsProcessing(true);
 
     try {
+      addLog('info', 'Payment Form', `Starting payment process with method: ${paymentMethod}`, {
+        paymentMethod,
+        bookingId,
+        amount
+      });
+
       switch (paymentMethod) {
         case "stripe":
           await handleStripePayment();
@@ -141,10 +183,14 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           handleCryptoPayment();
           break;
         default:
-          throw new Error("Metodo di pagamento non supportato");
+          const errorMsg = "Metodo di pagamento non supportato";
+          addLog('error', 'Payment Form', errorMsg, { paymentMethod });
+          throw new Error(errorMsg);
       }
     } catch (error) {
-      onError(`Errore durante il pagamento: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      addLog('error', 'Payment Form', `Payment process failed: ${errorMessage}`, error);
+      onError(`Errore durante il pagamento: ${errorMessage}`);
     } finally {
       setIsProcessing(false);
     }
