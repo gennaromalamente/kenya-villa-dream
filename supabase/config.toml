@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.test-paypal]
 verify_jwt = false
+
+[functions.payment-paypal]
+verify_jwt = false
+
+[functions.payment-stripe]
+verify_jwt = false

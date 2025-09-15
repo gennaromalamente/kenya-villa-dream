@@ -49,7 +49,8 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           amount,
           currency,
           booking_id: bookingId,
-          payment_method: 'stripe'
+          payment_method: 'stripe',
+          redirect_base: window.location.origin
         }
       });
 
@@ -57,8 +58,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
       if (data.url) {
         // Redirect to Stripe Checkout session
-        window.open(data.url, '_blank');
-        
+        window.location.href = data.url;
         toast({
           title: "Reindirizzamento Stripe",
           description: "Verrai reindirizzato a Stripe per completare il pagamento.",
@@ -81,7 +81,8 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           amount: Math.round(amount * 100), // Convert to cents for backend
           currency,
           booking_id: bookingId,
-          payment_method: 'paypal'
+          payment_method: 'paypal',
+          redirect_base: window.location.origin
         }
       });
 
@@ -89,7 +90,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
       // Redirect to PayPal approval URL
       if (data.approval_url) {
-        window.open(data.approval_url, '_blank');
+        window.location.href = data.approval_url;
         toast({
           title: "Reindirizzamento PayPal",
           description: "Verrai reindirizzato a PayPal per completare il pagamento.",

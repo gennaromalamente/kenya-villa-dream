@@ -48,7 +48,7 @@ serve(async (req) => {
 
     logStep("User authenticated", { userId: user_id, email: user_email });
 
-    const { amount, currency, booking_id, payment_method } = await req.json();
+    const { amount, currency, booking_id, payment_method, redirect_base } = await req.json();
 
     // Validate required fields
     if (!amount || !booking_id) {
@@ -56,6 +56,16 @@ serve(async (req) => {
     }
 
     logStep("Payment request", { amount, currency, booking_id, payment_method });
+
+    // Determine redirect base URL
+    const headerOrigin = req.headers.get("origin") || "";
+    const referer = req.headers.get("referer") || "";
+    let inferredOrigin = headerOrigin;
+    if (!inferredOrigin && referer) {
+      try { inferredOrigin = new URL(referer).origin; } catch (_e) {}
+    }
+    const envOrigin = Deno.env.get("WEBSITE_ORIGIN") || "";
+    const baseUrl = (redirect_base || envOrigin || inferredOrigin || "https://qivroruezcxdnueuojkg.supabase.co").replace(/\/+$/, "");
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE") || "", {
@@ -78,8 +88,8 @@ serve(async (req) => {
         },
       ],
       mode: 'payment',
-      success_url: `${req.headers.get("origin") || "https://qivroruezcxdnueuojkg.supabase.co"}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin") || "https://qivroruezcxdnueuojkg.supabase.co"}/payment-cancel`,
+      success_url: `${baseUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/payment-cancel`,
       metadata: {
         booking_id,
         user_id: user_id,

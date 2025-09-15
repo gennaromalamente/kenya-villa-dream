@@ -47,12 +47,22 @@ serve(async (req) => {
 
     logStep("User authenticated", { userId: user_id, email: user_email });
 
-    const { amount, currency, booking_id, payment_method } = await req.json();
+    const { amount, currency, booking_id, payment_method, redirect_base } = await req.json();
 
     // Validate required fields
     if (!amount || !booking_id) {
       throw new Error("Missing required fields: amount, booking_id");
     }
+
+    // Determine redirect base URL
+    const headerOrigin = req.headers.get("origin") || "";
+    const referer = req.headers.get("referer") || "";
+    let inferredOrigin = headerOrigin;
+    if (!inferredOrigin && referer) {
+      try { inferredOrigin = new URL(referer).origin; } catch (_e) {}
+    }
+    const envOrigin = Deno.env.get("WEBSITE_ORIGIN") || "";
+    const baseUrl = (redirect_base || envOrigin || inferredOrigin || "https://qivroruezcxdnueuojkg.supabase.co").replace(/\/+$/, "");
 
     logStep("Payment request", { amount, currency, booking_id, payment_method });
 
@@ -104,8 +114,8 @@ serve(async (req) => {
         reference_id: booking_id
       }],
       application_context: {
-        return_url: `${req.headers.get("origin")}/payment-success`,
-        cancel_url: `${req.headers.get("origin")}/payment-cancel`
+        return_url: `${baseUrl}/payment-success`,
+        cancel_url: `${baseUrl}/payment-cancel`
       }
     };
 
