@@ -83,7 +83,7 @@ const VillaInteriors = () => {
             </h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                La Villa ha una superficie interna di oltre mq, suddivisa in sei grandi ambienti di <strong>lusso</strong>: tre <strong>suite</strong>, due <strong>camere</strong> e una <strong>dépendance</strong> con vasca <strong>idromassaggio</strong> e <strong>aria condizionata</strong>.
+                La Villa ha una superficie interna di oltre 240 mq, suddivisa in sei grandi ambienti di <strong>lusso</strong>: tre <strong>suite</strong>, due <strong>camere</strong> e una <strong>dépendance</strong> con vasca <strong>idromassaggio</strong> e <strong>aria condizionata</strong>.
               </p>
               <p>
                 Può ospitare comodamente dieci o dodici persone di tutte le età e con le più varie esigenze, permettendo a ognuna la sua più completa privacy. È disposta su due piani, ha sei camere da letto con bagno indipendente, tre cucine attrezzate, tre salotti con <strong>camino</strong>.
