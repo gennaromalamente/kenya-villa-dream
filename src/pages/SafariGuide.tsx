@@ -123,11 +123,11 @@ const SafariGuide = () => {
         <div className="container mx-auto text-center">
           <div className="max-w-2xl mx-auto">
             <h3 className="text-3xl font-bold mb-6 text-foreground">
-              Personalizza la Tua Avventura Safari
+              Personalizza il tuo Safari
             </h3>
             <p className="text-lg text-muted-foreground mb-8">
               Ogni safari può essere combinato e personalizzato secondo le tue preferenze. 
-              Contattaci per creare il tuo itinerario perfetto in Kenya.
+              Contattaci per creare la tua avventura in Kenya.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
