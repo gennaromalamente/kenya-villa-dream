@@ -65,7 +65,7 @@ const includedFeatures = [
   },
   {
     icon: <Bath className="w-6 h-6" />,
-    title: "3 Bagni Privati",
+    title: "2 Bagni Privati",
     description: "Ogni camera con bagno privato e comfort moderni"
   }
 ];

@@ -9,7 +9,7 @@ const features = [
   },
   {
     icon: <Bath className="w-8 h-8" />,
-    title: "3 Bagni Privati",
+    title: "2 Bagni Privati",
     description: "Eleganti bagni in stile coloniale con finiture di pregio"
   },
   {
