@@ -148,14 +148,41 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     onSuccess("bank_transfer_pending");
   };
 
-  const handleCryptoPayment = () => {
-    addLog('warning', 'Crypto Payment', 'Crypto payment attempted but not implemented', { bookingId });
-    // Show crypto payment details
-    toast({
-      title: "Pagamento Criptovalute",
-      description: "Funzionalità in fase di sviluppo.",
-    });
-    onError("Pagamento con criptovalute non ancora disponibile");
+  const handleCryptoPayment = async () => {
+    try {
+      addLog('info', 'Crypto Payment', 'Initiating crypto payment', { bookingId });
+      
+      const { data, error } = await supabase.functions.invoke('payment-crypto', {
+        body: { 
+          amount,
+          currency: currency.toLowerCase(),
+          booking_id: bookingId,
+          payment_method: 'crypto'
+        }
+      });
+      
+      if (error) {
+        addLog('error', 'Crypto Payment', 'Crypto function invocation failed', error);
+        throw error;
+      }
+      
+      addLog('info', 'Crypto Payment', 'Crypto function response received', data);
+      
+      // Open crypto payment page in new tab
+      window.open(data.payment_url, '_blank');
+      
+      toast({
+        title: "Pagamento Criptovalute Avviato",
+        description: "Completa il pagamento nella nuova scheda. Aggiorneremo la prenotazione una volta confermato.",
+      });
+      
+      onSuccess(data.payment_id);
+      
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      addLog('error', 'Crypto Payment', `Payment failed: ${errorMessage}`, error);
+      onError(`Errore pagamento crypto: ${errorMessage}`);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

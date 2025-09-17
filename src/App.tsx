@@ -12,6 +12,7 @@ import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancel from "./pages/PaymentCancel";
+import CryptoPayment from "./pages/CryptoPayment";
 import Transactions from "./pages/Transactions";
 import SafariGuide from "./pages/SafariGuide";
 
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/safari-guide" element={<SafariGuide />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-cancel" element={<PaymentCancel />} />
+            <Route path="/crypto-payment" element={<CryptoPayment />} />
             <Route path="/transactions" element={<Transactions />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
