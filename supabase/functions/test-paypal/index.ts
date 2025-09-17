@@ -13,34 +13,50 @@ serve(async (req) => {
   try {
     console.log("[TEST-PAYPAL] Starting PayPal configuration test");
 
-    // Check PayPal credentials
-    const paypalCredentials = Deno.env.get("PAYPAL");
-    if (!paypalCredentials) {
+    // Check & parse PayPal credentials (supports 'id:secret', JSON, or with mode)
+    const rawSecret = Deno.env.get("PAYPAL");
+    if (!rawSecret) {
       return new Response(JSON.stringify({ 
         error: "PayPal credentials not found", 
-        message: "Please add PAYPAL secret in format: client_id:client_secret"
+        message: "Set PAYPAL secret as 'client_id:client_secret' or JSON {client_id, client_secret, mode}"
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
       });
     }
 
-    // Parse PayPal credentials
-    const [clientId, clientSecret] = paypalCredentials.split(":");
+    let clientId = "";
+    let clientSecret = "";
+    let mode: "sandbox" | "live" = "sandbox";
+
+    try {
+      const obj = JSON.parse(rawSecret);
+      clientId = obj.client_id || obj.clientId || "";
+      clientSecret = obj.client_secret || obj.clientSecret || "";
+      if (obj.mode && String(obj.mode).toLowerCase() === "live") mode = "live";
+    } catch {
+      const normalized = rawSecret.trim().replace(/\s+/g, "").replace(/[|,;]+/g, ":");
+      const parts = normalized.split(":");
+      if (parts.length >= 2) {
+        [clientId, clientSecret] = [parts[0], parts[1]];
+        if (parts[2]) mode = parts[2].toLowerCase() === "live" ? "live" : "sandbox";
+      }
+    }
+
     if (!clientId || !clientSecret) {
       return new Response(JSON.stringify({ 
         error: "Invalid PayPal credentials format", 
-        message: "PayPal credentials must be in format: client_id:client_secret"
+        message: "Use 'client_id:client_secret' or JSON {client_id, client_secret, mode}"
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
       });
     }
 
-    console.log("[TEST-PAYPAL] Credentials found, testing PayPal API connection");
+    console.log("[TEST-PAYPAL] Credentials parsed", { mode });
 
     // Test PayPal API connection
-    const paypalBaseUrl = "https://api.sandbox.paypal.com";
+    const paypalBaseUrl = mode === "live" ? "https://api.paypal.com" : "https://api.sandbox.paypal.com";
     
     const authResponse = await fetch(`${paypalBaseUrl}/v1/oauth2/token`, {
       method: "POST",

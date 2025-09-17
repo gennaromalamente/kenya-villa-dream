@@ -66,21 +66,41 @@ serve(async (req) => {
 
     logStep("Payment request", { amount, currency, booking_id, payment_method });
 
-    // Get PayPal credentials
-    const paypalCredentials = Deno.env.get("PAYPAL");
-    logStep("PayPal credentials check", { hasCredentials: !!paypalCredentials });
-    if (!paypalCredentials) {
-      throw new Error("PayPal credentials not configured - please add PAYPAL secret in format: client_id:client_secret");
+    // Get PayPal credentials (support multiple formats)
+    const rawSecret = Deno.env.get("PAYPAL");
+    logStep("PayPal credentials check", { hasCredentials: !!rawSecret });
+    if (!rawSecret) {
+      throw new Error("PayPal credentials not configured - set PAYPAL secret as 'client_id:client_secret' or JSON {client_id, client_secret, mode}");
     }
 
-    // Parse PayPal credentials (expected format: "client_id:client_secret")
-    const [clientId, clientSecret] = paypalCredentials.split(":");
+    let clientId = "";
+    let clientSecret = "";
+    let mode: "sandbox" | "live" = "sandbox";
+
+    try {
+      // Try JSON first
+      const obj = JSON.parse(rawSecret);
+      clientId = obj.client_id || obj.clientId || "";
+      clientSecret = obj.client_secret || obj.clientSecret || "";
+      if (obj.mode && String(obj.mode).toLowerCase() === "live") mode = "live";
+    } catch {
+      // Fallbacks: allow delimiters like ':', '|', ',', ';' and optional 3rd token as mode
+      const normalized = rawSecret.trim().replace(/\s+/g, "").replace(/[|,;]+/g, ":");
+      const parts = normalized.split(":");
+      if (parts.length >= 2) {
+        [clientId, clientSecret] = [parts[0], parts[1]];
+        if (parts[2]) mode = parts[2].toLowerCase() === "live" ? "live" : "sandbox";
+      }
+    }
+
     if (!clientId || !clientSecret) {
-      throw new Error("PayPal credentials must be in format: client_id:client_secret");
+      throw new Error("Invalid PayPal credentials. Use 'client_id:client_secret' or JSON {client_id, client_secret, mode}");
     }
 
-    // For sandbox testing, use sandbox endpoints
-    const paypalBaseUrl = "https://api.sandbox.paypal.com";
+    logStep("PayPal credentials parsed", { mode });
+
+    // Choose environment based on mode (default sandbox)
+    const paypalBaseUrl = mode === "live" ? "https://api.paypal.com" : "https://api.sandbox.paypal.com";
     
     // Get access token from PayPal
     const authResponse = await fetch(`${paypalBaseUrl}/v1/oauth2/token`, {
