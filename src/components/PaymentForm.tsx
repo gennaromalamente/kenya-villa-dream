@@ -39,7 +39,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
 
   const paymentMethods = [
     { id: "stripe", name: "Carta di Credito/Debito", icon: CreditCard },
-    { id: "paypal", name: "PayPal", icon: Wallet },
     { id: "bank_transfer", name: "Bonifico Bancario", icon: Building2 },
     { id: "crypto", name: "Criptovalute", icon: Bitcoin }
   ];
@@ -91,52 +90,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     }
   };
 
-  const handlePayPalPayment = async () => {
-    try {
-      const amountInCents = Math.round(amount * 100);
-      addLog('info', 'PayPal Payment', `Initiating PayPal payment for booking ${bookingId}`, {
-        amount: amountInCents,
-        currency,
-        booking_id: bookingId
-      });
-
-      const { data, error } = await supabase.functions.invoke('payment-paypal', {
-        body: {
-          amount: amountInCents, // Convert to cents for backend
-          currency,
-          booking_id: bookingId,
-          payment_method: 'paypal',
-          redirect_base: window.location.origin
-        }
-      });
-
-      if (error) {
-        addLog('error', 'PayPal Payment', 'PayPal function invocation failed', error);
-        throw error;
-      }
-
-      addLog('info', 'PayPal Payment', 'PayPal function response received', data);
-
-      // Redirect to PayPal approval URL
-      if (data.approval_url) {
-        addLog('info', 'PayPal Payment', `Redirecting to PayPal: ${data.approval_url}`);
-        window.location.href = data.approval_url;
-        toast({
-          title: "Reindirizzamento PayPal",
-          description: "Verrai reindirizzato a PayPal per completare il pagamento.",
-        });
-        onSuccess(data.order_id);
-      } else {
-        const errorMsg = 'PayPal approval URL not received';
-        addLog('error', 'PayPal Payment', errorMsg, data);
-        throw new Error(errorMsg);
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      addLog('error', 'PayPal Payment', `Payment failed: ${errorMessage}`, error);
-      onError(`Errore pagamento PayPal: ${errorMessage}`);
-    }
-  };
 
   const handleBankTransferPayment = () => {
     addLog('info', 'Bank Transfer', 'Bank transfer payment initiated', { bookingId });
@@ -200,14 +153,11 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         case "stripe":
           await handleStripePayment();
           break;
-        case "paypal":
-          await handlePayPalPayment();
-          break;
         case "bank_transfer":
           handleBankTransferPayment();
           break;
         case "crypto":
-          handleCryptoPayment();
+          await handleCryptoPayment();
           break;
         default:
           const errorMsg = "Metodo di pagamento non supportato";
@@ -312,14 +262,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
             </div>
           )}
 
-          {/* PayPal Info */}
-          {paymentMethod === "paypal" && (
-            <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                Verrai reindirizzato a PayPal per completare il pagamento in modo sicuro.
-              </p>
-            </div>
-          )}
 
           {/* Crypto Info */}
           {paymentMethod === "crypto" && (
