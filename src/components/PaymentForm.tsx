@@ -69,12 +69,12 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       addLog('info', 'Stripe Payment', 'Stripe function response received', data);
 
       if (data.url) {
-        addLog('info', 'Stripe Payment', `Redirecting to Stripe checkout: ${data.url}`);
-        // Redirect to Stripe Checkout session
-        window.location.href = data.url;
+        addLog('info', 'Stripe Payment', `Opening Stripe checkout in new tab: ${data.url}`);
+        // Open Stripe Checkout in a new tab to avoid iframe/CSP issues
+        window.open(data.url, '_blank', 'noopener,noreferrer');
         toast({
-          title: "Reindirizzamento Stripe",
-          description: "Verrai reindirizzato a Stripe per completare il pagamento.",
+          title: "Checkout Stripe Aperto",
+          description: "Il pagamento si apre in una nuova scheda.",
         });
         
         onSuccess(data.session_id);
