@@ -83,6 +83,16 @@ const VillaCalendar = ({ id }: VillaCalendarProps = {}) => {
   const handleBookingSubmit = async (data: BookingFormData) => {
     if (!checkIn || !checkOut) return;
     
+    // Validate check-out is after check-in
+    if (checkOut <= checkIn) {
+      toast({
+        title: "Date non valide",
+        description: "La data di check-out deve essere successiva alla data di check-in.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     try {
       console.log('Sending booking request:', {
@@ -246,10 +256,10 @@ const VillaCalendar = ({ id }: VillaCalendarProps = {}) => {
 
                 <Button 
                   className="w-full bg-primary hover:bg-primary-dark"
-                  disabled={!checkIn || !checkOut}
+                  disabled={!checkIn || !checkOut || (checkOut && checkIn && checkOut <= checkIn)}
                   onClick={() => setIsBookingModalOpen(true)}
                 >
-                  {checkIn && checkOut ? "Prenota Ora" : "Seleziona le Date"}
+                  {checkIn && checkOut && checkOut > checkIn ? "Prenota Ora" : "Seleziona le Date"}
                 </Button>
 
                 <div className="text-xs text-muted-foreground text-center">
