@@ -27,6 +27,11 @@ const exteriorsImages = [
     src: "/lovable-uploads/05c3c364-3f5a-4f91-8c0f-3dd0081a2fe9.png",
     title: "Giardino Tropicale",
     description: "Immersa nella natura incontaminata del Kenya. Palme, alberi secolari e prati curati creano un paradiso verde dove rilassarsi e godersi la bellezza naturale."
+  },
+  {
+    src: "/lovable-uploads/villa-pool-exterior.jpg",
+    title: "Piscina Privata",
+    description: "Villa con piscina privata esclusiva immersa nel verde. Architettura elegante con ampie verande e spazi esterni per il massimo relax."
   }
 ];
 
