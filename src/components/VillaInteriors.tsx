@@ -83,7 +83,10 @@ const VillaInteriors = () => {
             </h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                La Villa ha una superficie interna di oltre 240 mq, suddivisa in grandi ambienti di lusso esclusivi: tre camere, un grande soggiorno, due bagni e una cucina a totale disposizione. E' disposta su due piani e può ospitare comodamente fino a sei persone, permettendo a ognuna la sua più completa privacy.
+                La Villa ha una superficie interna di oltre <strong>240 mq</strong>, suddivisa in grandi ambienti di <strong>lusso</strong> esclusivi: tre <strong>camere</strong>, un grande <strong>soggiorno</strong>, due <strong>bagni</strong> e una <strong>cucina</strong> a totale disposizione.
+              </p>
+              <p>
+                E' disposta su due piani e può ospitare comodamente fino a sei persone, permettendo a ognuna la sua più completa privacy.
               </p>
             </div>
             <Button 
