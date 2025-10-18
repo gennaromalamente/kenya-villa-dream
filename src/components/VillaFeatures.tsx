@@ -15,7 +15,7 @@ const features = [
   {
     icon: <MapPin className="w-8 h-8" />,
     title: "10 min dalla Spiaggia",
-    description: "A piedi verso acque cristalline e sabbia dorata"
+    description: "A soli 10 minuti a piedi dalle acque cristalline e sabbie bianche del Kenya"
   },
   {
     icon: <Car className="w-8 h-8" />,
