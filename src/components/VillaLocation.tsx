@@ -20,8 +20,7 @@ const VillaLocation = () => {
                 <div>
                   <h3 className="text-xl font-semibold mb-2">Mare Cristallino</h3>
                   <p className="text-muted-foreground">
-                    A soli 10 minuti a piedi ti aspetta una spiaggia con acque turchesi 
-                    e sabbia fine, perfetta per rilassarsi al sole africano.
+                    10 minuti a piedi dalle acque cristalline e sabbie bianche del Kenya
                   </p>
                 </div>
               </div>
