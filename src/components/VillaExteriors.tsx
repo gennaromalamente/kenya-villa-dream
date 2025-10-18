@@ -49,7 +49,7 @@ const VillaExteriors = () => {
                 Avrai a disposizione un <strong>giardino</strong> privato di 5000 mq e una <strong>piscina privata ed esclusiva</strong>. Il parcheggio videosorvegliato è gratuito, come lo è la ricarica per auto elettriche.
               </p>
               <p>
-                Una <strong>Pergola</strong> di 60 mq e un'antica <strong>Loggia</strong> permetteranno e a te e alle persone che ti sono care di mangiare tutti insieme all'aperto. Potrete godere sempre di aria fresca, pulita e naturale, e di una <strong>vista panoramica</strong> su campi coltivati, boschi, colline, laghetti tipici della <strong>Toscana</strong>.
+                Uno spazio esterno che permetterà cene e pranzi esclusivi all'aperto. Potrai godere di aria pulita e naturale e di una vista rilassante che ti farà gustare ancora meglio i tuoi pasti preferiti
               </p>
             </div>
             <Button 
