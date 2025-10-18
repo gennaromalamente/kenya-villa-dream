@@ -46,7 +46,7 @@ const VillaExteriors = () => {
             </h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                Avrai a disposizione un <strong>giardino</strong> privato di 5000 mq e una <strong>piscina privata ed esclusiva</strong>. Il parcheggio videosorvegliato è gratuito, come lo è la ricarica per auto elettriche.
+                Avrai a disposizione un <strong>giardino</strong> privato di 5000 mq e una <strong>piscina privata ed esclusiva</strong>. L'area videosorvegliata con sicurezza privata h24 ti permetterà di non avere pensieri durante le tue giornate di relax fuori dalla Villa
               </p>
               <p>
                 Uno spazio esterno che permetterà cene e pranzi esclusivi all'aperto. Potrai godere di aria pulita e naturale e di una vista rilassante che ti farà gustare ancora meglio i tuoi pasti preferiti
