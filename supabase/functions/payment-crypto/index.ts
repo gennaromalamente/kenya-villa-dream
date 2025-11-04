@@ -8,7 +8,9 @@ const corsHeaders = {
 
 const MAXELPAY_API_KEY = Deno.env.get("MAXELPAY_API_KEY");
 const MAXELPAY_SECRET_KEY = Deno.env.get("MAXELPAY_SECRET_KEY");
-const MAXELPAY_API_URL = "https://api.maxelpay.com/v1/production/merchant/order/checkout";
+// IMPORTANT: Verify the correct endpoint in MaxelPay Dashboard -> API Settings
+// Common alternatives: /v1/orders/create, /v1/payment/create, /api/v1/checkout
+const MAXELPAY_API_URL = "https://api.maxelpay.com/v1/orders/create";
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -109,7 +111,7 @@ serve(async (req) => {
       description: `Booking ${booking_id}`,
     };
 
-    logStep("Creating MaxelPay order", maxelPayOrder);
+    logStep("Creating MaxelPay order", { url: MAXELPAY_API_URL, order: maxelPayOrder });
 
     // Call MaxelPay API - Try common authentication formats
     const maxelPayResponse = await fetch(MAXELPAY_API_URL, {
@@ -123,10 +125,16 @@ serve(async (req) => {
       body: JSON.stringify(maxelPayOrder),
     });
 
+    logStep("MaxelPay response status", { 
+      status: maxelPayResponse.status, 
+      statusText: maxelPayResponse.statusText,
+      headers: Object.fromEntries(maxelPayResponse.headers.entries())
+    });
+
     if (!maxelPayResponse.ok) {
       const errorText = await maxelPayResponse.text();
       logStep("MaxelPay API error", { status: maxelPayResponse.status, error: errorText });
-      throw new Error(`MaxelPay API error: ${errorText}`);
+      throw new Error(`MaxelPay API error (${maxelPayResponse.status}): Check endpoint URL in dashboard. Current: ${MAXELPAY_API_URL}`);
     }
 
     const maxelPayData = await maxelPayResponse.json();
