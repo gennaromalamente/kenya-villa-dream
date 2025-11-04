@@ -8,9 +8,9 @@ const corsHeaders = {
 
 const MAXELPAY_API_KEY = Deno.env.get("MAXELPAY_API_KEY");
 const MAXELPAY_SECRET_KEY = Deno.env.get("MAXELPAY_SECRET_KEY");
-// IMPORTANT: Verify the correct endpoint in MaxelPay Dashboard -> API Settings
-// Common alternatives: /v1/orders/create, /v1/payment/create, /api/v1/checkout
-const MAXELPAY_API_URL = "https://api.maxelpay.com/v1/orders/create";
+// MaxelPay API endpoint: https://api.maxelpay.com/v1/{environment}/merchant/order/checkout
+// Use "prod" for production, "sandbox" for testing
+const MAXELPAY_API_URL = "https://api.maxelpay.com/v1/prod/merchant/order/checkout";
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
