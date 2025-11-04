@@ -56,7 +56,6 @@ const TransactionHistory: React.FC = () => {
   const getPaymentMethodLabel = (method: string, provider: string) => {
     const methodMap = {
       stripe: "Carta di Credito",
-      paypal: "PayPal",
       bank_transfer: "Bonifico",
       crypto: "Criptovalute"
     };
