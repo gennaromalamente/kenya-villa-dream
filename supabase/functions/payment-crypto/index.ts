@@ -1,13 +1,15 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { crypto } from "https://deno.land/std@0.190.0/crypto/mod.ts";
+import { encode as base64Encode } from "https://deno.land/std@0.190.0/encoding/base64.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const RAW_MAXELPAY_ENV = Deno.env.get("MAXELPAY_ENV") || "prod"; // could be 'PROD'/'Sandbox', normalize below
-const MAXELPAY_ENV = RAW_MAXELPAY_ENV.toLowerCase() === "sandbox" ? "sandbox" : "prod"; // default to prod if invalid
+const RAW_MAXELPAY_ENV = Deno.env.get("MAXELPAY_ENV") || "prod";
+const MAXELPAY_ENV = RAW_MAXELPAY_ENV.toLowerCase() === "stg" ? "stg" : "prod";
 const MAXELPAY_API_KEY = Deno.env.get("MAXELPAY_API_KEY");
 const MAXELPAY_SECRET_KEY = Deno.env.get("MAXELPAY_SECRET_KEY");
 const MAXELPAY_API_URL = `https://api.maxelpay.com/v1/${MAXELPAY_ENV}/merchant/order/checkout`;
@@ -16,6 +18,34 @@ const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CRYPTO-PAYMENT] ${step}${detailsStr}`);
 };
+
+// AES-256-CBC encryption function compatible with MaxelPay
+async function encryptPayload(payload: string, secretKey: string): Promise<string> {
+  const encoder = new TextEncoder();
+  
+  // Use first 16 bytes of secret key as IV (as per MaxelPay docs)
+  const iv = encoder.encode(secretKey.substring(0, 16));
+  const keyData = encoder.encode(secretKey);
+  
+  // Import key for AES-CBC
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "AES-CBC" },
+    false,
+    ["encrypt"]
+  );
+  
+  // Encrypt
+  const encryptedData = await crypto.subtle.encrypt(
+    { name: "AES-CBC", iv },
+    cryptoKey,
+    encoder.encode(payload)
+  );
+  
+  // Convert to base64
+  return base64Encode(new Uint8Array(encryptedData));
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -103,17 +133,23 @@ serve(async (req) => {
     const returnUrl = `${baseUrl}/payment-success?payment_id=${paymentId}`;
 
     const maxelPayOrder = {
-      order_id: paymentId,
-      amount: parseFloat(amount),
+      orderID: paymentId,
+      amount: parseFloat(amount).toString(),
       currency: (currency as string).toUpperCase(),
-      callback_url: callbackUrl,
-      return_url: returnUrl,
-      description: `Booking ${booking_id}`,
+      redirectUrl: returnUrl,
+      webhookUrl: callbackUrl,
+      timestamp: Math.floor(Date.now() / 1000).toString(),
     };
 
-    logStep("Creating MaxelPay order", { url: MAXELPAY_API_URL, order: maxelPayOrder });
+    logStep("Creating MaxelPay order", { order: maxelPayOrder });
 
-    // Call MaxelPay API - Try common authentication formats
+    // Encrypt payload as per MaxelPay requirements
+    const payloadJson = JSON.stringify(maxelPayOrder);
+    const encryptedPayload = await encryptPayload(payloadJson, MAXELPAY_SECRET_KEY);
+    
+    logStep("Payload encrypted");
+
+    // Call MaxelPay API with encrypted payload
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
 
@@ -121,17 +157,11 @@ serve(async (req) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": `Bearer ${MAXELPAY_API_KEY}`,
         "api-key": MAXELPAY_API_KEY,
-        "api-secret": MAXELPAY_SECRET_KEY,
-        "x-api-key": MAXELPAY_API_KEY,
-        "x-api-secret": MAXELPAY_SECRET_KEY,
       },
-      body: JSON.stringify(maxelPayOrder),
+      body: JSON.stringify({ data: encryptedPayload }),
       signal: controller.signal,
     }).catch((e) => {
-      // Network/timeout error -> treat as transient
       logStep("MaxelPay network/timeout error", { message: String(e) });
       return new Response(null, { status: 599, statusText: "Network Timeout" }) as any;
     });
@@ -141,7 +171,6 @@ serve(async (req) => {
     logStep("MaxelPay response status", {
       status: (maxelPayResponse as Response).status,
       statusText: (maxelPayResponse as Response).statusText,
-      headers: Object.fromEntries((maxelPayResponse as Response).headers.entries())
     });
 
     if (!(maxelPayResponse as Response).ok) {
@@ -163,7 +192,6 @@ serve(async (req) => {
             payment_method: "crypto",
             payment_provider: "maxelpay",
             status: "pending",
-            provider_error: `upstream_${(maxelPayResponse as Response).status}`,
           } as any);
 
         if (insertPendingError) {
@@ -193,7 +221,9 @@ serve(async (req) => {
     const maxelPayData = await (maxelPayResponse as Response).json();
     logStep("MaxelPay response", maxelPayData);
 
-    const cryptoPaymentUrl = maxelPayData.payment_url || maxelPayData.checkout_url || `${baseUrl}/crypto-payment?payment_id=${paymentId}`;
+    const cryptoPaymentUrl = maxelPayData.payment_url || maxelPayData.checkout_url || 
+                             maxelPayData.data?.payment_url || maxelPayData.data?.checkout_url ||
+                             `${baseUrl}/crypto-payment?payment_id=${paymentId}`;
 
     // Insert transaction record
     const { error: insertError } = await supabaseClient
