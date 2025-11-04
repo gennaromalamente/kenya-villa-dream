@@ -43,13 +43,13 @@ serve(async (req) => {
         });
       }
 
-      // Check availability for the requested dates
-      const { data: availability, error: availabilityError } = await supabaseClient
+      // Check if any dates are explicitly marked as unavailable
+      const { data: unavailableDates, error: availabilityError } = await supabaseClient
         .from('availability')
         .select('*')
         .gte('date', bookingData.check_in)
         .lt('date', bookingData.check_out)
-        .eq('is_available', true);
+        .eq('is_available', false);
 
       if (availabilityError) {
         console.error('Error checking availability:', availabilityError);
@@ -61,23 +61,44 @@ serve(async (req) => {
         });
       }
 
-      // Calculate total nights and check if all dates are available
-      const checkIn = new Date(bookingData.check_in);
-      const checkOut = new Date(bookingData.check_out);
-      const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
-      const totalNights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      if (!availability || availability.length !== totalNights) {
+      // If any dates are explicitly unavailable, reject the booking
+      if (unavailableDates && unavailableDates.length > 0) {
         return new Response(JSON.stringify({ 
-          error: 'Some dates are not available for booking' 
+          error: 'Some dates are not available for booking',
+          unavailable_dates: unavailableDates.map(d => d.date)
         }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
-      // Calculate total price
-      const totalPrice = availability.reduce((sum, day) => sum + parseFloat(day.price_per_night), 0);
+      // Calculate total nights
+      const checkIn = new Date(bookingData.check_in);
+      const checkOut = new Date(bookingData.check_out);
+      const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
+      const totalNights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      // Get available dates with custom pricing (if any)
+      const { data: pricedDates } = await supabaseClient
+        .from('availability')
+        .select('*')
+        .gte('date', bookingData.check_in)
+        .lt('date', bookingData.check_out);
+
+      // Calculate total price using custom prices or default price
+      const defaultPricePerNight = 150; // Default from table
+      let totalPrice = 0;
+      
+      if (pricedDates && pricedDates.length > 0) {
+        // Use custom prices where available, default price for other nights
+        const customPriceDays = pricedDates.length;
+        const defaultPriceDays = totalNights - customPriceDays;
+        totalPrice = pricedDates.reduce((sum, day) => sum + parseFloat(day.price_per_night), 0) +
+                     (defaultPriceDays * defaultPricePerNight);
+      } else {
+        // All nights use default price
+        totalPrice = totalNights * defaultPricePerNight;
+      }
 
       // Create booking
       const { data: booking, error: bookingError } = await supabaseClient
