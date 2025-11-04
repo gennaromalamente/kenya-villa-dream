@@ -12,10 +12,26 @@ const CryptoPayment: React.FC = () => {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState("pending");
+  const [redirecting, setRedirecting] = useState(false);
   
   const paymentId = searchParams.get("payment_id");
   const amount = searchParams.get("amount");
   const currency = searchParams.get("currency");
+  const paymentUrl = searchParams.get("payment_url");
+
+  // If we have a payment URL from MaxelPay, redirect immediately
+  useEffect(() => {
+    if (paymentUrl && !redirecting) {
+      setRedirecting(true);
+      toast({
+        title: "Redirecting to MaxelPay...",
+        description: "You will be redirected to complete your payment",
+      });
+      setTimeout(() => {
+        window.location.href = paymentUrl;
+      }, 1500);
+    }
+  }, [paymentUrl, redirecting, toast]);
 
   // Demo crypto addresses - in production, these would be generated dynamically
   const cryptoAddresses = {
@@ -93,6 +109,21 @@ const CryptoPayment: React.FC = () => {
         <Card className="max-w-md w-full text-center">
           <CardContent className="p-6">
             <p className="text-red-500">Invalid payment link. Please try again.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show redirecting state
+  if (redirecting && paymentUrl) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center p-4">
+        <Card className="max-w-md w-full text-center">
+          <CardContent className="p-12">
+            <Bitcoin className="h-16 w-16 text-orange-500 mx-auto mb-4 animate-pulse" />
+            <h2 className="text-2xl font-bold mb-2">Redirecting to MaxelPay...</h2>
+            <p className="text-muted-foreground">Please wait while we redirect you to complete your payment securely.</p>
           </CardContent>
         </Card>
       </div>
@@ -188,24 +219,19 @@ const CryptoPayment: React.FC = () => {
         </Card>
 
         {/* Production Warning */}
-        <Card className="border-red-300 bg-red-50">
+        <Card className="border-blue-300 bg-blue-50">
           <CardContent className="p-6">
-            <p className="text-red-800 font-semibold mb-2">
-              ⚠️ DEMO MODE - NOT FOR PRODUCTION
+            <p className="text-blue-800 font-semibold mb-2">
+              ✓ MaxelPay Configured
             </p>
-            <div className="text-sm text-red-700 space-y-2">
-              <p>This is a demonstration interface. For production use, you MUST integrate a real crypto payment gateway:</p>
-              <ul className="list-disc list-inside ml-4 space-y-1">
-                <li><strong>CoinGate</strong> - https://coingate.com/ (Recommended)</li>
-                <li><strong>NOWPayments</strong> - https://nowpayments.io/</li>
-                <li><strong>Coinbase Commerce</strong> - https://commerce.coinbase.com/</li>
-              </ul>
-              <p className="mt-3">
-                <strong>Why?</strong> Real gateways provide blockchain verification, webhook confirmations, 
-                dynamic addresses, multiple confirmations, and fraud protection.
+            <div className="text-sm text-blue-700 space-y-2">
+              <p>This payment system is now integrated with <strong>MaxelPay</strong> cryptocurrency payment gateway.</p>
+              <p className="mt-2">
+                <strong>Features:</strong> Real-time blockchain verification, multiple cryptocurrency support, 
+                webhook confirmations, and secure payment processing.
               </p>
               <p className="mt-2 text-xs">
-                Manual payment confirmation has been disabled for security reasons.
+                If you're seeing this page instead of being redirected, the payment URL may not be configured correctly.
               </p>
             </div>
           </CardContent>

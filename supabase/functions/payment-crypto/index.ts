@@ -6,6 +6,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const MAXELPAY_API_KEY = Deno.env.get("MAXELPAY_API_KEY");
+const MAXELPAY_SECRET_KEY = Deno.env.get("MAXELPAY_SECRET_KEY");
+const MAXELPAY_API_URL = "https://api.maxelpay.com/v1/production/merchant/order/checkout";
+
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CRYPTO-PAYMENT] ${step}${detailsStr}`);
@@ -85,23 +89,48 @@ serve(async (req) => {
     // Generate a unique payment ID
     const paymentId = crypto.randomUUID();
     
-    // IMPORTANT: This is a DEMO implementation
-    // For PRODUCTION, integrate with:
-    // - CoinGate (https://coingate.com/) - Recommended
-    // - NOWPayments (https://nowpayments.io/)
-    // - Coinbase Commerce (https://commerce.coinbase.com/)
-    // - BitPay (https://bitpay.com/)
-    //
-    // These services provide:
-    // - Real-time blockchain verification
-    // - Multiple cryptocurrency support
-    // - Webhook confirmations (after X confirmations)
-    // - Dynamic address generation
-    // - Automatic conversion rates
-    // - Fraud protection
+    // Check if MaxelPay credentials are configured
+    if (!MAXELPAY_API_KEY || !MAXELPAY_SECRET_KEY) {
+      throw new Error("MaxelPay credentials not configured");
+    }
+
+    // Prepare MaxelPay order data
+    const baseUrl = req.headers.get("origin") || Deno.env.get("VITE_SUPABASE_URL") || "https://gautcjatzseiyzxlnkra.supabase.co";
+    const callbackUrl = `${Deno.env.get("VITE_SUPABASE_URL")}/functions/v1/maxelpay-webhook`;
+    const returnUrl = `${baseUrl}/payment-success?payment_id=${paymentId}`;
     
-    const baseUrl = req.headers.get("origin") || "https://your-domain.com";
-    const cryptoPaymentUrl = `${baseUrl}/crypto-payment?payment_id=${paymentId}&amount=${amount}&currency=${currency}`;
+    const maxelPayOrder = {
+      order_id: paymentId,
+      amount: parseFloat(amount),
+      currency: currency.toUpperCase(),
+      callback_url: callbackUrl,
+      return_url: returnUrl,
+      description: `Booking ${booking_id}`,
+    };
+
+    logStep("Creating MaxelPay order", maxelPayOrder);
+
+    // Call MaxelPay API
+    const maxelPayResponse = await fetch(MAXELPAY_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-Key": MAXELPAY_API_KEY,
+        "X-API-Secret": MAXELPAY_SECRET_KEY,
+      },
+      body: JSON.stringify(maxelPayOrder),
+    });
+
+    if (!maxelPayResponse.ok) {
+      const errorText = await maxelPayResponse.text();
+      logStep("MaxelPay API error", { status: maxelPayResponse.status, error: errorText });
+      throw new Error(`MaxelPay API error: ${errorText}`);
+    }
+
+    const maxelPayData = await maxelPayResponse.json();
+    logStep("MaxelPay response", maxelPayData);
+
+    const cryptoPaymentUrl = maxelPayData.payment_url || maxelPayData.checkout_url || `${baseUrl}/crypto-payment?payment_id=${paymentId}`;
 
     // Insert transaction record
     const { error: insertError } = await supabaseClient
@@ -113,7 +142,7 @@ serve(async (req) => {
         amount: parseFloat(amount),
         currency: currency.toUpperCase(),
         payment_method: "crypto",
-        payment_provider: "manual",
+        payment_provider: "maxelpay",
         status: "pending",
       });
 

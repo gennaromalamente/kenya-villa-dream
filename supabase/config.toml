@@ -1,1 +1,4 @@
 project_id = "gautcjatzseiyzxlnkra"
+
+[functions.maxelpay-webhook]
+verify_jwt = false
