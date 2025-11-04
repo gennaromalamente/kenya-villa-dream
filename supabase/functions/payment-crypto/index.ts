@@ -9,7 +9,8 @@ const corsHeaders = {
 };
 
 const RAW_MAXELPAY_ENV = Deno.env.get("MAXELPAY_ENV") || "prod";
-const MAXELPAY_ENV = RAW_MAXELPAY_ENV.toLowerCase() === "stg" ? "stg" : "prod";
+const ENV_LC = RAW_MAXELPAY_ENV.toLowerCase();
+const MAXELPAY_ENV = (ENV_LC === "stg" || ENV_LC === "sandbox" || ENV_LC === "dev" || ENV_LC === "test") ? "stg" : "prod";
 const MAXELPAY_API_KEY = Deno.env.get("MAXELPAY_API_KEY");
 const MAXELPAY_SECRET_KEY = Deno.env.get("MAXELPAY_SECRET_KEY");
 const MAXELPAY_API_URL = `https://api.maxelpay.com/v1/${MAXELPAY_ENV}/merchant/order/checkout`;
