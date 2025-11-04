@@ -13,6 +13,8 @@ const ENV_LC = RAW_MAXELPAY_ENV.toLowerCase();
 const MAXELPAY_ENV = (ENV_LC === "stg" || ENV_LC === "sandbox" || ENV_LC === "dev" || ENV_LC === "test") ? "stg" : "prod";
 const MAXELPAY_API_KEY = Deno.env.get("MAXELPAY_API_KEY");
 const MAXELPAY_SECRET_KEY = Deno.env.get("MAXELPAY_SECRET_KEY");
+const MAXELPAY_STG_API_KEY = Deno.env.get("MAXELPAY_SANDBOX_API_KEY") ?? Deno.env.get("MAXELPAY_STG_API_KEY");
+const MAXELPAY_STG_SECRET_KEY = Deno.env.get("MAXELPAY_SANDBOX_SECRET_KEY") ?? Deno.env.get("MAXELPAY_STG_SECRET_KEY");
 const MAXELPAY_API_URL = `https://api.maxelpay.com/v1/${MAXELPAY_ENV}/merchant/order/checkout`;
 
 const logStep = (step: string, details?: any) => {
@@ -122,10 +124,15 @@ serve(async (req) => {
     // Generate a unique payment ID
     const paymentId = crypto.randomUUID();
 
-    // Check if MaxelPay credentials are configured
-    if (!MAXELPAY_API_KEY || !MAXELPAY_SECRET_KEY) {
-      throw new Error("MaxelPay credentials not configured");
+    // Resolve environment-specific credentials
+    const apiKeyToUse = MAXELPAY_ENV === "stg" ? (MAXELPAY_STG_API_KEY || MAXELPAY_API_KEY) : MAXELPAY_API_KEY;
+    const secretToUse = MAXELPAY_ENV === "stg" ? (MAXELPAY_STG_SECRET_KEY || MAXELPAY_SECRET_KEY) : MAXELPAY_SECRET_KEY;
+
+    if (!apiKeyToUse || !secretToUse) {
+      throw new Error("MaxelPay credentials not configured for selected environment");
     }
+
+    logStep("Credentials selected", { env: MAXELPAY_ENV, usingSandboxCreds: MAXELPAY_ENV === "stg" && !!MAXELPAY_STG_API_KEY });
 
     // Prepare MaxelPay order data
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "https://gautcjatzseiyzxlnkra.supabase.co";
@@ -146,7 +153,7 @@ serve(async (req) => {
 
     // Encrypt payload as per MaxelPay requirements
     const payloadJson = JSON.stringify(maxelPayOrder);
-    const encryptedPayload = await encryptPayload(payloadJson, MAXELPAY_SECRET_KEY);
+    const encryptedPayload = await encryptPayload(payloadJson, secretToUse);
     
     logStep("Payload encrypted");
 
@@ -158,7 +165,7 @@ serve(async (req) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "api-key": MAXELPAY_API_KEY,
+        "api-key": apiKeyToUse,
       },
       body: JSON.stringify({ data: encryptedPayload }),
       signal: controller.signal,
