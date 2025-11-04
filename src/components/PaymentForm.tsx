@@ -177,8 +177,13 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     <Card className="w-full max-w-lg mx-auto">
       <CardHeader>
         <CardTitle className="text-center">Metodo di Pagamento</CardTitle>
-        <div className="text-center text-2xl font-bold text-primary">
-          €{amount.toFixed(2)} {currency}
+        <div className="space-y-2">
+          <div className="text-center text-2xl font-bold text-primary">
+            €{amount.toFixed(2)} {currency}
+          </div>
+          <p className="text-sm text-muted-foreground text-center">
+            Prezzo calcolato automaticamente in base ai giorni di prenotazione
+          </p>
         </div>
       </CardHeader>
       <CardContent>
