@@ -43,17 +43,62 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const { amount, currency, booking_id, payment_method } = await req.json();
-    logStep("Payment request", { amount, currency, booking_id, payment_method });
+    
+    // INPUT VALIDATION
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+      throw new Error("Invalid amount: must be a positive number");
+    }
+    if (!currency || typeof currency !== 'string' || currency.length > 10) {
+      throw new Error("Invalid currency: must be a valid currency code");
+    }
+    if (!booking_id || typeof booking_id !== 'string') {
+      throw new Error("Invalid booking_id: required");
+    }
+    
+    logStep("Payment request validated", { amount, currency, booking_id, payment_method });
+
+    // Check for duplicate transactions (idempotency)
+    const { data: existingTx } = await supabaseClient
+      .from("transactions")
+      .select("transaction_id, status")
+      .eq("booking_id", booking_id)
+      .eq("payment_method", "crypto")
+      .eq("status", "pending")
+      .maybeSingle();
+    
+    if (existingTx) {
+      logStep("Existing pending transaction found", existingTx);
+      const baseUrl = req.headers.get("origin") || "https://your-domain.com";
+      return new Response(JSON.stringify({
+        payment_id: existingTx.transaction_id,
+        payment_url: `${baseUrl}/crypto-payment?payment_id=${existingTx.transaction_id}&amount=${amount}&currency=${currency}`,
+        amount,
+        currency,
+        status: "pending",
+        message: "Existing pending payment found"
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
 
     // Generate a unique payment ID
     const paymentId = crypto.randomUUID();
     
-    // For demo purposes, we'll create a simple crypto payment URL
-    // In production, you'd integrate with services like:
-    // - CoinGate (https://coingate.com/)
-    // - BitPay (https://bitpay.com/)
-    // - Coinbase Commerce (https://commerce.coinbase.com/)
+    // IMPORTANT: This is a DEMO implementation
+    // For PRODUCTION, integrate with:
+    // - CoinGate (https://coingate.com/) - Recommended
     // - NOWPayments (https://nowpayments.io/)
+    // - Coinbase Commerce (https://commerce.coinbase.com/)
+    // - BitPay (https://bitpay.com/)
+    //
+    // These services provide:
+    // - Real-time blockchain verification
+    // - Multiple cryptocurrency support
+    // - Webhook confirmations (after X confirmations)
+    // - Dynamic address generation
+    // - Automatic conversion rates
+    // - Fraud protection
     
     const baseUrl = req.headers.get("origin") || "https://your-domain.com";
     const cryptoPaymentUrl = `${baseUrl}/crypto-payment?payment_id=${paymentId}&amount=${amount}&currency=${currency}`;
@@ -64,19 +109,17 @@ serve(async (req) => {
       .insert({
         transaction_id: paymentId,
         booking_id,
-        user_id: user.id,
-        user_email: user.email,
+        user_id: user.id === "guest" ? null : user.id,
         amount: parseFloat(amount),
         currency: currency.toUpperCase(),
         payment_method: "crypto",
+        payment_provider: "manual",
         status: "pending",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
       });
 
     if (insertError) {
       logStep("Error inserting transaction", insertError);
-      throw new Error("Failed to create transaction record");
+      throw new Error(`Failed to create transaction record: ${insertError.message}`);
     }
 
     logStep("Transaction created", { paymentId });

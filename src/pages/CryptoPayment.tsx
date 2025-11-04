@@ -74,35 +74,17 @@ const CryptoPayment: React.FC = () => {
   };
 
   const markAsCompleted = async () => {
-    if (!paymentId) return;
+    // REMOVED: This was a critical security vulnerability
+    // In production, payment confirmation MUST come from:
+    // 1. Blockchain verification (via CoinGate/NOWPayments webhook)
+    // 2. Server-side validation with minimum confirmations (e.g., 3 for BTC)
+    // 3. Never allow client-side status updates
     
-    try {
-      const { error } = await supabase
-        .from("transactions")
-        .update({ 
-          status: "completed",
-          updated_at: new Date().toISOString()
-        })
-        .eq("transaction_id", paymentId);
-        
-      if (error) throw error;
-      
-      setPaymentStatus("completed");
-      toast({
-        title: "Payment Marked Complete",
-        description: "Redirecting to success page...",
-      });
-      
-      setTimeout(() => {
-        window.location.href = "/payment-success";
-      }, 1500);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update payment status",
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Feature Disabled",
+      description: "Manual payment confirmation disabled for security. Use a real crypto gateway.",
+      variant: "destructive",
+    });
   };
 
   if (!paymentId || !amount || !currency) {
@@ -205,20 +187,27 @@ const CryptoPayment: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Demo Completion Button */}
-        <Card className="border-dashed border-orange-300 bg-orange-50">
-          <CardContent className="p-6 text-center">
-            <p className="text-orange-700 mb-4">
-              <strong>Demo Mode:</strong> For testing purposes, you can manually mark this payment as completed
+        {/* Production Warning */}
+        <Card className="border-red-300 bg-red-50">
+          <CardContent className="p-6">
+            <p className="text-red-800 font-semibold mb-2">
+              ⚠️ DEMO MODE - NOT FOR PRODUCTION
             </p>
-            <Button 
-              onClick={markAsCompleted}
-              disabled={paymentStatus === "completed"}
-              variant="outline"
-              className="border-orange-300 text-orange-700 hover:bg-orange-100"
-            >
-              Mark Payment as Completed (Demo)
-            </Button>
+            <div className="text-sm text-red-700 space-y-2">
+              <p>This is a demonstration interface. For production use, you MUST integrate a real crypto payment gateway:</p>
+              <ul className="list-disc list-inside ml-4 space-y-1">
+                <li><strong>CoinGate</strong> - https://coingate.com/ (Recommended)</li>
+                <li><strong>NOWPayments</strong> - https://nowpayments.io/</li>
+                <li><strong>Coinbase Commerce</strong> - https://commerce.coinbase.com/</li>
+              </ul>
+              <p className="mt-3">
+                <strong>Why?</strong> Real gateways provide blockchain verification, webhook confirmations, 
+                dynamic addresses, multiple confirmations, and fraud protection.
+              </p>
+              <p className="mt-2 text-xs">
+                Manual payment confirmation has been disabled for security reasons.
+              </p>
+            </div>
           </CardContent>
         </Card>
 
