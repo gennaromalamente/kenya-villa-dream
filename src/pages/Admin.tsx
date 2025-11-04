@@ -8,76 +8,116 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { LogIn, LogOut, Calendar, Users, Euro, Mail, Phone } from "lucide-react";
+import { User, Session } from "@supabase/supabase-js";
 
 interface Booking {
   id: string;
   guest_name: string;
   guest_email: string;
   guest_phone?: string;
-  check_in_date: string;
-  check_out_date: string;
-  number_of_guests: number;
-  total_nights: number;
+  check_in: string;
+  check_out: string;
+  guests_count: number;
   total_price: number;
-  booking_status: string;
+  status: string;
   special_requests?: string;
   created_at: string;
 }
 
-interface AdminUser {
-  username: string;
-  role: string;
-}
-
 const Admin = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<AdminUser | null>(null);
-  const [username, setUsername] = useState("");
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const { toast } = useToast();
 
-  // Check for existing session
   useEffect(() => {
-    const adminUser = localStorage.getItem('admin_user');
-    if (adminUser) {
-      const user = JSON.parse(adminUser);
-      setUser(user);
-      setIsAuthenticated(true);
-      fetchBookings();
-    }
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Check admin role after state update
+          setTimeout(() => {
+            checkAdminRole(session.user.id);
+          }, 0);
+        } else {
+          setIsAdmin(false);
+          setIsCheckingAuth(false);
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        checkAdminRole(session.user.id);
+      } else {
+        setIsCheckingAuth(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  const checkAdminRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .single();
+
+      if (error || !data) {
+        setIsAdmin(false);
+        toast({
+          title: "Accesso negato",
+          description: "Privilegi amministratore richiesti",
+          variant: "destructive"
+        });
+      } else {
+        setIsAdmin(true);
+        fetchBookings();
+      }
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+      setIsAdmin(false);
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('admin-auth', {
-        body: {
-          username,
-          password
-        }
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      if (error) throw error;
-
-      if (data.success) {
-        setUser(data.user);
-        setIsAuthenticated(true);
-        localStorage.setItem('admin_user', JSON.stringify(data.user));
+      if (error) {
+        toast({
+          title: "Errore di login",
+          description: "Credenziali non valide",
+          variant: "destructive"
+        });
+      } else if (data.session) {
         toast({
           title: "Login effettuato",
           description: "Benvenuto nel pannello admin"
-        });
-        fetchBookings();
-      } else {
-        toast({
-          title: "Errore di login",
-          description: data.message,
-          variant: "destructive"
         });
       }
     } catch (error) {
@@ -92,25 +132,40 @@ const Admin = () => {
     }
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setUser(null);
-    setUsername("");
-    setPassword("");
-    localStorage.removeItem('admin_user');
-    setBookings([]);
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setIsAdmin(false);
+      setBookings([]);
+      toast({
+        title: "Logout effettuato",
+        description: "Arrivederci!"
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Errore",
+        description: "Errore durante il logout",
+        variant: "destructive"
+      });
+    }
   };
 
   const fetchBookings = async () => {
+    if (!session) return;
+
     try {
       const { data, error } = await supabase.functions.invoke('admin-auth', {
-        method: 'GET'
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
       });
 
       if (error) throw error;
 
-      if (data.success) {
-        setBookings(data.bookings);
+      if (data?.success) {
+        setBookings(data.bookings || []);
       }
     } catch (error) {
       console.error('Error fetching bookings:', error);
@@ -127,6 +182,7 @@ const Admin = () => {
       case 'confirmed': return 'bg-green-500';
       case 'pending': return 'bg-yellow-500';
       case 'cancelled': return 'bg-red-500';
+      case 'completed': return 'bg-blue-500';
       default: return 'bg-gray-500';
     }
   };
@@ -136,11 +192,27 @@ const Admin = () => {
       case 'confirmed': return 'Confermata';
       case 'pending': return 'In attesa';
       case 'cancelled': return 'Annullata';
+      case 'completed': return 'Completata';
       default: return status;
     }
   };
 
-  if (!isAuthenticated) {
+  const calculateNights = (checkIn: string, checkOut: string) => {
+    const nights = Math.ceil(
+      (new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return nights;
+  };
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center">
+        <p>Verifica autenticazione...</p>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center p-6">
         <Card className="w-full max-w-md">
@@ -153,12 +225,12 @@ const Admin = () => {
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
@@ -192,7 +264,7 @@ const Admin = () => {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Pannello Admin</h1>
           <div className="flex items-center space-x-4">
-            <span>Benvenuto, {user?.username}</span>
+            <span>Benvenuto, {user?.email}</span>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="w-4 h-4 mr-2" />
               Logout
@@ -220,7 +292,7 @@ const Admin = () => {
                 <Users className="w-8 h-8 text-accent" />
                 <div>
                   <p className="text-2xl font-bold">
-                    {bookings.filter(b => b.booking_status === 'confirmed').length}
+                    {bookings.filter(b => b.status === 'confirmed').length}
                   </p>
                   <p className="text-muted-foreground">Confermate</p>
                 </div>
@@ -235,7 +307,7 @@ const Admin = () => {
                 <div>
                   <p className="text-2xl font-bold">
                     €{bookings
-                      .filter(b => b.booking_status === 'confirmed')
+                      .filter(b => b.status === 'confirmed')
                       .reduce((sum, b) => sum + b.total_price, 0)
                     }
                   </p>
@@ -263,22 +335,22 @@ const Admin = () => {
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
                         <h3 className="font-semibold">{booking.guest_name}</h3>
-                        <Badge className={getStatusColor(booking.booking_status)}>
-                          {getStatusText(booking.booking_status)}
+                        <Badge className={getStatusColor(booking.status)}>
+                          {getStatusText(booking.status)}
                         </Badge>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
                         <div>
                           <span className="font-medium">Check-in:</span>
-                          <p>{new Date(booking.check_in_date).toLocaleDateString('it-IT')}</p>
+                          <p>{new Date(booking.check_in).toLocaleDateString('it-IT')}</p>
                         </div>
                         <div>
                           <span className="font-medium">Check-out:</span>
-                          <p>{new Date(booking.check_out_date).toLocaleDateString('it-IT')}</p>
+                          <p>{new Date(booking.check_out).toLocaleDateString('it-IT')}</p>
                         </div>
                         <div>
                           <span className="font-medium">Ospiti:</span>
-                          <p>{booking.number_of_guests}</p>
+                          <p>{booking.guests_count}</p>
                         </div>
                         <div>
                           <span className="font-medium">Totale:</span>
@@ -309,8 +381,8 @@ const Admin = () => {
                   </div>
                   <div>
                     <Label>Stato</Label>
-                    <Badge className={getStatusColor(selectedBooking.booking_status)}>
-                      {getStatusText(selectedBooking.booking_status)}
+                    <Badge className={getStatusColor(selectedBooking.status)}>
+                      {getStatusText(selectedBooking.status)}
                     </Badge>
                   </div>
                 </div>
@@ -318,22 +390,22 @@ const Admin = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>Check-in</Label>
-                    <p>{new Date(selectedBooking.check_in_date).toLocaleDateString('it-IT')}</p>
+                    <p>{new Date(selectedBooking.check_in).toLocaleDateString('it-IT')}</p>
                   </div>
                   <div>
                     <Label>Check-out</Label>
-                    <p>{new Date(selectedBooking.check_out_date).toLocaleDateString('it-IT')}</p>
+                    <p>{new Date(selectedBooking.check_out).toLocaleDateString('it-IT')}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
                   <div>
                     <Label>Ospiti</Label>
-                    <p>{selectedBooking.number_of_guests}</p>
+                    <p>{selectedBooking.guests_count}</p>
                   </div>
                   <div>
                     <Label>Notti</Label>
-                    <p>{selectedBooking.total_nights}</p>
+                    <p>{calculateNights(selectedBooking.check_in, selectedBooking.check_out)}</p>
                   </div>
                   <div>
                     <Label>Totale</Label>

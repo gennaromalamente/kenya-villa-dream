@@ -13,45 +13,61 @@ serve(async (req) => {
   }
 
   try {
+    // Validate JWT token from Authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.log('Missing authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401 
+        }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    
+    // Create Supabase client with service role key for admin operations
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    if (req.method === 'POST') {
-      const { username, password } = await req.json()
-
-      console.log('Admin login attempt for username:', username)
-
-      // Simple password verification for demo purposes
-      // In production, use proper bcrypt verification
-      if (username === 'admin' && password === 'admin123') {
-        console.log('Admin login successful')
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            message: 'Login successful',
-            user: { username: 'admin', role: 'admin' }
-          }),
-          { 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 200 
-          }
-        )
-      } else {
-        console.log('Admin login failed - invalid credentials')
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            message: 'Credenziali non valide' 
-          }),
-          { 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 401 
-          }
-        )
-      }
+    // Verify the JWT token and get user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      console.log('Invalid token or user not found');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401 
+        }
+      );
     }
+
+    // Check if user has admin role
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .single();
+
+    if (roleError || !roleData) {
+      console.log('User does not have admin role:', user.id);
+      return new Response(
+        JSON.stringify({ error: 'Forbidden - Admin access required' }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 403 
+        }
+      );
+    }
+
+    console.log('Admin access granted for user:', user.id);
 
     if (req.method === 'GET') {
       // Get all bookings for admin dashboard
@@ -62,7 +78,13 @@ serve(async (req) => {
 
       if (error) {
         console.error('Error fetching bookings:', error)
-        throw error
+        return new Response(
+          JSON.stringify({ error: 'Failed to fetch bookings' }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 500 
+          }
+        );
       }
 
       console.log('Fetched bookings for admin:', bookings?.length || 0)
@@ -85,12 +107,9 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Admin auth error:', error)
+    console.error('Admin endpoint error:', error)
     return new Response(
-      JSON.stringify({ 
-        error: 'Internal server error',
-        details: error.message 
-      }),
+      JSON.stringify({ error: 'Internal server error' }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500 
