@@ -132,7 +132,22 @@ serve(async (req) => {
       throw new Error("MaxelPay credentials not configured for selected environment");
     }
 
-    logStep("Credentials selected", { env: MAXELPAY_ENV, usingSandboxCreds: MAXELPAY_ENV === "stg" && !!MAXELPAY_STG_API_KEY });
+    // CRITICAL: MaxelPay requires secret key to be exactly 32 characters for AES-256
+    if (secretToUse.length !== 32) {
+      logStep("ERROR: Secret key length invalid", { 
+        actual: secretToUse.length, 
+        required: 32,
+        hint: "MaxelPay requires exactly 32 character secret key for AES-256-CBC encryption"
+      });
+      throw new Error(`MaxelPay secret key must be exactly 32 characters (current: ${secretToUse.length})`);
+    }
+
+    logStep("Credentials selected", { 
+      env: MAXELPAY_ENV, 
+      usingSandboxCreds: MAXELPAY_ENV === "stg" && !!MAXELPAY_STG_API_KEY,
+      apiKeyLength: apiKeyToUse.length,
+      secretKeyLength: secretToUse.length
+    });
 
     // Prepare MaxelPay order data
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "https://gautcjatzseiyzxlnkra.supabase.co";
