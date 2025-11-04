@@ -95,8 +95,9 @@ serve(async (req) => {
     }
 
     // Prepare MaxelPay order data
-    const baseUrl = req.headers.get("origin") || Deno.env.get("VITE_SUPABASE_URL") || "https://gautcjatzseiyzxlnkra.supabase.co";
-    const callbackUrl = `${Deno.env.get("VITE_SUPABASE_URL")}/functions/v1/maxelpay-webhook`;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "https://gautcjatzseiyzxlnkra.supabase.co";
+    const baseUrl = req.headers.get("origin") || supabaseUrl;
+    const callbackUrl = `${supabaseUrl}/functions/v1/maxelpay-webhook`;
     const returnUrl = `${baseUrl}/payment-success?payment_id=${paymentId}`;
     
     const maxelPayOrder = {
@@ -110,13 +111,14 @@ serve(async (req) => {
 
     logStep("Creating MaxelPay order", maxelPayOrder);
 
-    // Call MaxelPay API
+    // Call MaxelPay API - Try common authentication formats
     const maxelPayResponse = await fetch(MAXELPAY_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": MAXELPAY_API_KEY,
-        "X-API-Secret": MAXELPAY_SECRET_KEY,
+        "Authorization": `Bearer ${MAXELPAY_API_KEY}`,
+        "api-key": MAXELPAY_API_KEY,
+        "api-secret": MAXELPAY_SECRET_KEY,
       },
       body: JSON.stringify(maxelPayOrder),
     });
