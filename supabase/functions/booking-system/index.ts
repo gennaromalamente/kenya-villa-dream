@@ -86,13 +86,12 @@ serve(async (req) => {
           guest_name: bookingData.guest_name,
           guest_email: bookingData.guest_email,
           guest_phone: bookingData.guest_phone,
-          check_in_date: bookingData.check_in,
-          check_out_date: bookingData.check_out,
-          number_of_guests: bookingData.guests_count,
-          total_nights: totalNights,
+          check_in: bookingData.check_in,
+          check_out: bookingData.check_out,
+          guests_count: bookingData.guests_count,
           total_price: totalPrice,
           special_requests: bookingData.special_requests,
-          booking_status: 'pending'
+          status: 'pending'
         })
         .select()
         .single();
