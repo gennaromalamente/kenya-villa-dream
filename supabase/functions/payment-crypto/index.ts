@@ -6,11 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const RAW_MAXELPAY_ENV = Deno.env.get("MAXELPAY_ENV") || "prod"; // could be 'PROD'/'Sandbox', normalize below
+const MAXELPAY_ENV = RAW_MAXELPAY_ENV.toLowerCase() === "sandbox" ? "sandbox" : "prod"; // default to prod if invalid
 const MAXELPAY_API_KEY = Deno.env.get("MAXELPAY_API_KEY");
 const MAXELPAY_SECRET_KEY = Deno.env.get("MAXELPAY_SECRET_KEY");
-const MAXELPAY_ENV = Deno.env.get("MAXELPAY_ENV") || "prod"; // 'prod' or 'sandbox'
 const MAXELPAY_API_URL = `https://api.maxelpay.com/v1/${MAXELPAY_ENV}/merchant/order/checkout`;
-
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -23,7 +23,7 @@ serve(async (req) => {
   }
 
   try {
-    logStep("Function started");
+    logStep("Function started", { env: MAXELPAY_ENV, url: MAXELPAY_API_URL });
 
     // Initialize Supabase client
     const supabaseClient = createClient(
@@ -33,14 +33,14 @@ serve(async (req) => {
     );
 
     // Get user from auth header or default to guest
-    let user = { id: "guest", email: "guest@example.com" };
+    let user: { id: string; email?: string } = { id: "guest", email: "guest@example.com" };
     const authHeader = req.headers.get("Authorization");
     if (authHeader) {
       try {
         const token = authHeader.replace("Bearer ", "");
         const { data: userData } = await supabaseClient.auth.getUser(token);
         if (userData.user) {
-          user = userData.user;
+          user = userData.user as unknown as { id: string; email?: string };
         }
       } catch (authError) {
         logStep("Auth failed, using guest", authError);
@@ -49,7 +49,7 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const { amount, currency, booking_id, payment_method } = await req.json();
-    
+
     // INPUT VALIDATION
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       throw new Error("Invalid amount: must be a positive number");
@@ -60,7 +60,7 @@ serve(async (req) => {
     if (!booking_id || typeof booking_id !== 'string') {
       throw new Error("Invalid booking_id: required");
     }
-    
+
     logStep("Payment request validated", { amount, currency, booking_id, payment_method });
 
     // Check for duplicate transactions (idempotency)
@@ -71,7 +71,7 @@ serve(async (req) => {
       .eq("payment_method", "crypto")
       .eq("status", "pending")
       .maybeSingle();
-    
+
     if (existingTx) {
       logStep("Existing pending transaction found", existingTx);
       const baseUrl = req.headers.get("origin") || "https://your-domain.com";
@@ -90,7 +90,7 @@ serve(async (req) => {
 
     // Generate a unique payment ID
     const paymentId = crypto.randomUUID();
-    
+
     // Check if MaxelPay credentials are configured
     if (!MAXELPAY_API_KEY || !MAXELPAY_SECRET_KEY) {
       throw new Error("MaxelPay credentials not configured");
@@ -101,11 +101,11 @@ serve(async (req) => {
     const baseUrl = req.headers.get("origin") || supabaseUrl;
     const callbackUrl = `${supabaseUrl}/functions/v1/maxelpay-webhook`;
     const returnUrl = `${baseUrl}/payment-success?payment_id=${paymentId}`;
-    
+
     const maxelPayOrder = {
       order_id: paymentId,
       amount: parseFloat(amount),
-      currency: currency.toUpperCase(),
+      currency: (currency as string).toUpperCase(),
       callback_url: callbackUrl,
       return_url: returnUrl,
       description: `Booking ${booking_id}`,
@@ -114,10 +114,14 @@ serve(async (req) => {
     logStep("Creating MaxelPay order", { url: MAXELPAY_API_URL, order: maxelPayOrder });
 
     // Call MaxelPay API - Try common authentication formats
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
     const maxelPayResponse = await fetch(MAXELPAY_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Accept": "application/json",
         "Authorization": `Bearer ${MAXELPAY_API_KEY}`,
         "api-key": MAXELPAY_API_KEY,
         "api-secret": MAXELPAY_SECRET_KEY,
@@ -125,21 +129,68 @@ serve(async (req) => {
         "x-api-secret": MAXELPAY_SECRET_KEY,
       },
       body: JSON.stringify(maxelPayOrder),
+      signal: controller.signal,
+    }).catch((e) => {
+      // Network/timeout error -> treat as transient
+      logStep("MaxelPay network/timeout error", { message: String(e) });
+      return new Response(null, { status: 599, statusText: "Network Timeout" }) as any;
     });
 
-    logStep("MaxelPay response status", { 
-      status: maxelPayResponse.status, 
-      statusText: maxelPayResponse.statusText,
-      headers: Object.fromEntries(maxelPayResponse.headers.entries())
+    clearTimeout(timeout);
+
+    logStep("MaxelPay response status", {
+      status: (maxelPayResponse as Response).status,
+      statusText: (maxelPayResponse as Response).statusText,
+      headers: Object.fromEntries((maxelPayResponse as Response).headers.entries())
     });
 
-    if (!maxelPayResponse.ok) {
-      const errorText = await maxelPayResponse.text();
-      logStep("MaxelPay API error", { status: maxelPayResponse.status, error: errorText });
-      throw new Error(`MaxelPay API error (${maxelPayResponse.status}): ${errorText}`);
+    if (!(maxelPayResponse as Response).ok) {
+      const errorText = await (maxelPayResponse as Response).text();
+      logStep("MaxelPay API error", { status: (maxelPayResponse as Response).status, error: errorText });
+
+      // Graceful fallback for provider/transient errors (>=500 or timeout 599)
+      if ((maxelPayResponse as Response).status >= 500 || (maxelPayResponse as Response).status === 599) {
+        const cryptoPaymentUrl = `${baseUrl}/crypto-payment?payment_id=${paymentId}&amount=${amount}&currency=${currency}`;
+
+        const { error: insertPendingError } = await supabaseClient
+          .from("transactions")
+          .insert({
+            transaction_id: paymentId,
+            booking_id,
+            user_id: user.id === "guest" ? null : user.id,
+            amount: parseFloat(amount),
+            currency: (currency as string).toUpperCase(),
+            payment_method: "crypto",
+            payment_provider: "maxelpay",
+            status: "pending",
+            provider_error: `upstream_${(maxelPayResponse as Response).status}`,
+          } as any);
+
+        if (insertPendingError) {
+          logStep("Error inserting pending transaction after provider error", insertPendingError);
+          throw new Error(`Failed to create transaction record: ${insertPendingError.message}`);
+        }
+
+        logStep("Transaction created with fallback due to provider error", { paymentId });
+
+        return new Response(JSON.stringify({
+          payment_id: paymentId,
+          payment_url: cryptoPaymentUrl,
+          amount,
+          currency,
+          status: "pending",
+          message: "Provider unavailable, using local crypto checkout"
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+
+      // For 4xx or other errors, return a proper failure
+      throw new Error(`MaxelPay API error (${(maxelPayResponse as Response).status}): ${errorText}`);
     }
 
-    const maxelPayData = await maxelPayResponse.json();
+    const maxelPayData = await (maxelPayResponse as Response).json();
     logStep("MaxelPay response", maxelPayData);
 
     const cryptoPaymentUrl = maxelPayData.payment_url || maxelPayData.checkout_url || `${baseUrl}/crypto-payment?payment_id=${paymentId}`;
@@ -152,7 +203,7 @@ serve(async (req) => {
         booking_id,
         user_id: user.id === "guest" ? null : user.id,
         amount: parseFloat(amount),
-        currency: currency.toUpperCase(),
+        currency: (currency as string).toUpperCase(),
         payment_method: "crypto",
         payment_provider: "maxelpay",
         status: "pending",
