@@ -109,8 +109,7 @@ serve(async (req) => {
         payment_method: payment_method || 'stripe',
         payment_provider: 'stripe',
         transaction_id: session.id,
-        status: 'pending',
-        metadata: { session_id: session.id }
+        status: 'pending'
       });
 
     if (transactionError) {
