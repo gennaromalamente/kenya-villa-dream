@@ -125,21 +125,86 @@ serve(async (req) => {
     const paymentId = crypto.randomUUID();
 
     // Resolve environment-specific credentials
-    const apiKeyToUse = MAXELPAY_ENV === "stg" ? (MAXELPAY_STG_API_KEY || MAXELPAY_API_KEY) : MAXELPAY_API_KEY;
-    const secretToUse = MAXELPAY_ENV === "stg" ? (MAXELPAY_STG_SECRET_KEY || MAXELPAY_SECRET_KEY) : MAXELPAY_SECRET_KEY;
+    let apiKeyToUse = MAXELPAY_ENV === "stg" ? (MAXELPAY_STG_API_KEY || MAXELPAY_API_KEY) : MAXELPAY_API_KEY;
+    let secretToUse = MAXELPAY_ENV === "stg" ? (MAXELPAY_STG_SECRET_KEY || MAXELPAY_SECRET_KEY) : MAXELPAY_SECRET_KEY;
+
+    // Trim whitespace from credentials (common copy-paste issue)
+    if (apiKeyToUse) apiKeyToUse = apiKeyToUse.trim();
+    if (secretToUse) secretToUse = secretToUse.trim();
 
     if (!apiKeyToUse || !secretToUse) {
-      throw new Error("MaxelPay credentials not configured for selected environment");
+      logStep("MaxelPay credentials missing, using local checkout");
+      // Fallback to local crypto checkout if credentials are missing
+      const cryptoPaymentUrl = `${baseUrl}/crypto-payment?payment_id=${paymentId}&amount=${amount}&currency=${currency}`;
+      
+      const { error: insertError } = await supabaseClient
+        .from("transactions")
+        .insert({
+          transaction_id: paymentId,
+          booking_id,
+          user_id: user.id === "guest" ? null : user.id,
+          amount: parseFloat(amount),
+          currency: (currency as string).toUpperCase(),
+          payment_method: "crypto",
+          payment_provider: "local",
+          status: "pending",
+        } as any);
+
+      if (insertError) {
+        throw new Error(`Failed to create transaction: ${insertError.message}`);
+      }
+
+      return new Response(JSON.stringify({
+        payment_id: paymentId,
+        payment_url: cryptoPaymentUrl,
+        amount,
+        currency,
+        status: "pending",
+        message: "Using local crypto checkout"
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
     }
 
     // CRITICAL: MaxelPay requires secret key to be exactly 32 characters for AES-256
     if (secretToUse.length !== 32) {
-      logStep("ERROR: Secret key length invalid", { 
+      logStep("Secret key length invalid, using local checkout", { 
         actual: secretToUse.length, 
-        required: 32,
-        hint: "MaxelPay requires exactly 32 character secret key for AES-256-CBC encryption"
+        required: 32
       });
-      throw new Error(`MaxelPay secret key must be exactly 32 characters (current: ${secretToUse.length})`);
+      
+      // Fallback to local crypto checkout
+      const cryptoPaymentUrl = `${baseUrl}/crypto-payment?payment_id=${paymentId}&amount=${amount}&currency=${currency}`;
+      
+      const { error: insertError } = await supabaseClient
+        .from("transactions")
+        .insert({
+          transaction_id: paymentId,
+          booking_id,
+          user_id: user.id === "guest" ? null : user.id,
+          amount: parseFloat(amount),
+          currency: (currency as string).toUpperCase(),
+          payment_method: "crypto",
+          payment_provider: "local",
+          status: "pending",
+        } as any);
+
+      if (insertError) {
+        throw new Error(`Failed to create transaction: ${insertError.message}`);
+      }
+
+      return new Response(JSON.stringify({
+        payment_id: paymentId,
+        payment_url: cryptoPaymentUrl,
+        amount,
+        currency,
+        status: "pending",
+        message: "Using local crypto checkout (invalid secret key length)"
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
     }
 
     logStep("Credentials selected", { 
@@ -200,8 +265,8 @@ serve(async (req) => {
       const errorText = await (maxelPayResponse as Response).text();
       logStep("MaxelPay API error", { status: (maxelPayResponse as Response).status, error: errorText });
 
-      // Graceful fallback for provider/transient errors (>=500 or timeout 599)
-      if ((maxelPayResponse as Response).status >= 500 || (maxelPayResponse as Response).status === 599) {
+      // Graceful fallback for provider errors (4xx/5xx) or timeout (599)
+      if ((maxelPayResponse as Response).status >= 400 || (maxelPayResponse as Response).status === 599) {
         const cryptoPaymentUrl = `${baseUrl}/crypto-payment?payment_id=${paymentId}&amount=${amount}&currency=${currency}`;
 
         const { error: insertPendingError } = await supabaseClient
@@ -213,7 +278,7 @@ serve(async (req) => {
             amount: parseFloat(amount),
             currency: (currency as string).toUpperCase(),
             payment_method: "crypto",
-            payment_provider: "maxelpay",
+            payment_provider: "local",
             status: "pending",
           } as any);
 
@@ -230,15 +295,12 @@ serve(async (req) => {
           amount,
           currency,
           status: "pending",
-          message: "Provider unavailable, using local crypto checkout"
+          message: "Using local crypto checkout (provider error)"
         }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 200,
         });
       }
-
-      // For 4xx or other errors, return a proper failure
-      throw new Error(`MaxelPay API error (${(maxelPayResponse as Response).status}): ${errorText}`);
     }
 
     const maxelPayData = await (maxelPayResponse as Response).json();
