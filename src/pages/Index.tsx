@@ -18,15 +18,15 @@ const Index = () => {
       <Navigation />
       <SideMenu />
       <VillaHero />
-      <VillaFeatures />
-      <VillaInteriors />
-      <VillaExteriors />
-      <VillaServicesSections />
-      <VillaNaturalEnvironment />
-      <VillaLocation />
+      <VillaFeatures id="features" />
+      <VillaInteriors id="interiors" />
+      <VillaExteriors id="exteriors" />
+      <VillaServicesSections id="services" />
+      <VillaNaturalEnvironment id="environment" />
+      <VillaLocation id="location" />
       <VillaReviews id="reviews" />
       <VillaCalendar id="calendar" />
-      <VillaContact />
+      <VillaContact id="contact" />
       <Footer />
     </div>
   );

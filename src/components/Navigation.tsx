@@ -50,13 +50,20 @@ const Navigation = () => {
                 </NavigationMenuTrigger>
                   <NavigationMenuContent className="bg-white/95 backdrop-blur-md border shadow-lg z-50">
                    <div className="grid gap-3 p-6 w-[400px] lg:w-[500px] bg-white rounded-lg">
-                     <div className="grid gap-2">
+                     <div className="grid gap-2 grid-cols-2">
                        <button 
                          className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground"
                          onClick={() => window.location.href = '/'}
                        >
                          <Home className="w-5 h-5 text-primary" />
                          <span>Home</span>
+                       </button>
+                       <button 
+                         className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground"
+                         onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                       >
+                         <Settings className="w-5 h-5 text-primary" />
+                         <span>Caratteristiche</span>
                        </button>
                        <button 
                          className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground"
@@ -67,10 +74,45 @@ const Navigation = () => {
                        </button>
                        <button 
                          className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground"
+                         onClick={() => document.getElementById('interiors')?.scrollIntoView({ behavior: 'smooth' })}
+                       >
+                         <Settings className="w-5 h-5 text-primary" />
+                         <span>Interni</span>
+                       </button>
+                       <button 
+                         className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground"
+                         onClick={() => document.getElementById('exteriors')?.scrollIntoView({ behavior: 'smooth' })}
+                       >
+                         <Settings className="w-5 h-5 text-primary" />
+                         <span>Esterni</span>
+                       </button>
+                       <button 
+                         className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground"
+                         onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })}
+                       >
+                         <Settings className="w-5 h-5 text-primary" />
+                         <span>Attività e Servizi</span>
+                       </button>
+                       <button 
+                         className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground"
+                         onClick={() => document.getElementById('environment')?.scrollIntoView({ behavior: 'smooth' })}
+                       >
+                         <MapPin className="w-5 h-5 text-primary" />
+                         <span>Ambiente Naturale</span>
+                       </button>
+                       <button 
+                         className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground"
+                         onClick={() => document.getElementById('location')?.scrollIntoView({ behavior: 'smooth' })}
+                       >
+                         <MapPin className="w-5 h-5 text-primary" />
+                         <span>Posizione</span>
+                       </button>
+                       <button 
+                         className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground"
                          onClick={() => document.getElementById('calendar')?.scrollIntoView({ behavior: 'smooth' })}
                        >
                          <Calendar className="w-5 h-5 text-primary" />
-                         <span>Calendario Disponibilità</span>
+                         <span>Calendario</span>
                        </button>
                        <button 
                          className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground"
@@ -78,6 +120,13 @@ const Navigation = () => {
                        >
                          <Star className="w-5 h-5 text-primary" />
                          <span>Recensioni</span>
+                       </button>
+                       <button 
+                         className="flex items-center space-x-2 p-3 rounded-lg hover:bg-accent/10 transition-colors text-foreground"
+                         onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                       >
+                         <Mail className="w-5 h-5 text-primary" />
+                         <span>Contatti</span>
                        </button>
                     </div>
                   </div>
@@ -164,10 +213,112 @@ const Navigation = () => {
                  
                  <button 
                    className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/10 transition-colors text-left"
+                   onClick={() => {
+                     setIsOpen(false);
+                     setTimeout(() => {
+                       if (window.location.pathname !== '/') {
+                         window.location.href = '/#features';
+                       } else {
+                         document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+                       }
+                     }, 100);
+                   }}
+                 >
+                   <Settings className="w-5 h-5 text-primary" />
+                   <span>Caratteristiche</span>
+                 </button>
+                 
+                 <button 
+                   className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/10 transition-colors text-left"
                    onClick={() => window.location.href = '/gallery'}
                  >
                    <Image className="w-5 h-5 text-primary" />
                    <span>Galleria Foto</span>
+                 </button>
+                 
+                 <button 
+                   className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/10 transition-colors text-left"
+                   onClick={() => {
+                     setIsOpen(false);
+                     setTimeout(() => {
+                       if (window.location.pathname !== '/') {
+                         window.location.href = '/#interiors';
+                       } else {
+                         document.getElementById('interiors')?.scrollIntoView({ behavior: 'smooth' });
+                       }
+                     }, 100);
+                   }}
+                 >
+                   <Settings className="w-5 h-5 text-primary" />
+                   <span>Interni</span>
+                 </button>
+                 
+                 <button 
+                   className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/10 transition-colors text-left"
+                   onClick={() => {
+                     setIsOpen(false);
+                     setTimeout(() => {
+                       if (window.location.pathname !== '/') {
+                         window.location.href = '/#exteriors';
+                       } else {
+                         document.getElementById('exteriors')?.scrollIntoView({ behavior: 'smooth' });
+                       }
+                     }, 100);
+                   }}
+                 >
+                   <Settings className="w-5 h-5 text-primary" />
+                   <span>Esterni</span>
+                 </button>
+                 
+                 <button 
+                   className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/10 transition-colors text-left"
+                   onClick={() => {
+                     setIsOpen(false);
+                     setTimeout(() => {
+                       if (window.location.pathname !== '/') {
+                         window.location.href = '/#services';
+                       } else {
+                         document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+                       }
+                     }, 100);
+                   }}
+                 >
+                   <Settings className="w-5 h-5 text-primary" />
+                   <span>Attività e Servizi</span>
+                 </button>
+                 
+                 <button 
+                   className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/10 transition-colors text-left"
+                   onClick={() => {
+                     setIsOpen(false);
+                     setTimeout(() => {
+                       if (window.location.pathname !== '/') {
+                         window.location.href = '/#environment';
+                       } else {
+                         document.getElementById('environment')?.scrollIntoView({ behavior: 'smooth' });
+                       }
+                     }, 100);
+                   }}
+                 >
+                   <MapPin className="w-5 h-5 text-primary" />
+                   <span>Ambiente Naturale</span>
+                 </button>
+                 
+                 <button 
+                   className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/10 transition-colors text-left"
+                   onClick={() => {
+                     setIsOpen(false);
+                     setTimeout(() => {
+                       if (window.location.pathname !== '/') {
+                         window.location.href = '/#location';
+                       } else {
+                         document.getElementById('location')?.scrollIntoView({ behavior: 'smooth' });
+                       }
+                     }, 100);
+                   }}
+                 >
+                   <MapPin className="w-5 h-5 text-primary" />
+                   <span>Posizione</span>
                  </button>
                 
                  <button 
@@ -184,7 +335,7 @@ const Navigation = () => {
                    }}
                  >
                    <Calendar className="w-5 h-5 text-primary" />
-                   <span>Calendario Disponibilità</span>
+                   <span>Calendario</span>
                  </button>
 
                  <button 
@@ -202,6 +353,23 @@ const Navigation = () => {
                  >
                    <Star className="w-5 h-5 text-primary" />
                    <span>Recensioni</span>
+                 </button>
+                 
+                 <button 
+                   className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent/10 transition-colors text-left"
+                   onClick={() => {
+                     setIsOpen(false);
+                     setTimeout(() => {
+                       if (window.location.pathname !== '/') {
+                         window.location.href = '/#contact';
+                       } else {
+                         document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                       }
+                     }, 100);
+                   }}
+                 >
+                   <Mail className="w-5 h-5 text-primary" />
+                   <span>Contatti</span>
                  </button>
 
                 <div className="pt-4 border-t border-border">

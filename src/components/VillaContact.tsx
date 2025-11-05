@@ -7,7 +7,11 @@ import { Phone, Mail, MessageCircle, Send } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
-const VillaContact = () => {
+interface VillaContactProps {
+  id?: string;
+}
+
+const VillaContact = ({ id }: VillaContactProps = {}) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -33,7 +37,7 @@ const VillaContact = () => {
   };
 
   return (
-    <section className="py-20 px-6 bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5">
+    <section id={id} className="py-20 px-6 bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5">
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">

@@ -2,9 +2,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Camera, Waves, Palmtree } from "lucide-react";
 
-const VillaLocation = () => {
+interface VillaLocationProps {
+  id?: string;
+}
+
+const VillaLocation = ({ id }: VillaLocationProps = {}) => {
   return (
-    <section className="py-20 px-6 bg-gradient-to-br from-accent/10 to-primary/5">
+    <section id={id} className="py-20 px-6 bg-gradient-to-br from-accent/10 to-primary/5">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="animate-fade-in-up">

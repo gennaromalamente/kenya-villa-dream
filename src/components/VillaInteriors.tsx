@@ -45,9 +45,13 @@ const interiorsImages = [
   }
 ];
 
-const VillaInteriors = () => {
+interface VillaInteriorsProps {
+  id?: string;
+}
+
+const VillaInteriors = ({ id }: VillaInteriorsProps = {}) => {
   return (
-    <section className="py-16 bg-background">
+    <section id={id} className="py-16 bg-background">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="relative animate-fade-in">

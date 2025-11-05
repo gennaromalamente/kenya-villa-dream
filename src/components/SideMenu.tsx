@@ -18,11 +18,63 @@ const SideMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
+    { name: "Home", icon: <Menu className="w-5 h-5" />, action: () => {
+      window.location.href = '/';
+      setIsOpen(false);
+    }},
+    { name: "Caratteristiche", icon: <Settings className="w-5 h-5" />, action: () => {
+      if (window.location.pathname === '/') {
+        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = '/#features';
+      }
+      setIsOpen(false);
+    }},
     { name: "Galleria Foto", icon: <Image className="w-5 h-5" />, action: () => {
       if (window.location.pathname === '/') {
         document.getElementById('gallery')?.scrollIntoView({ behavior: 'smooth' });
       } else {
         window.location.href = '/#gallery';
+      }
+      setIsOpen(false);
+    }},
+    { name: "Interni", icon: <Settings className="w-5 h-5" />, action: () => {
+      if (window.location.pathname === '/') {
+        document.getElementById('interiors')?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = '/#interiors';
+      }
+      setIsOpen(false);
+    }},
+    { name: "Esterni", icon: <Settings className="w-5 h-5" />, action: () => {
+      if (window.location.pathname === '/') {
+        document.getElementById('exteriors')?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = '/#exteriors';
+      }
+      setIsOpen(false);
+    }},
+    { name: "Attività e Servizi", icon: <Settings className="w-5 h-5" />, action: () => {
+      if (window.location.pathname === '/') {
+        document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = '/#services';
+      }
+      setIsOpen(false);
+    }},
+    { name: "Ambiente Naturale", icon: <MapPin className="w-5 h-5" />, action: () => {
+      if (window.location.pathname === '/') {
+        document.getElementById('environment')?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = '/#environment';
+      }
+      setIsOpen(false);
+    }},
+    { name: "Posizione", icon: <MapPin className="w-5 h-5" />, action: () => {
+      if (window.location.pathname === '/') {
+        document.getElementById('location')?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = '/#location';
       }
       setIsOpen(false);
     }},
@@ -35,7 +87,19 @@ const SideMenu = () => {
       setIsOpen(false);
     }},
     { name: "Recensioni", icon: <Star className="w-5 h-5" />, action: () => {
-      document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' });
+      if (window.location.pathname === '/') {
+        document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = '/#reviews';
+      }
+      setIsOpen(false);
+    }},
+    { name: "Contatti", icon: <Mail className="w-5 h-5" />, action: () => {
+      if (window.location.pathname === '/') {
+        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = '/#contact';
+      }
       setIsOpen(false);
     }},
   ];
