@@ -9,6 +9,7 @@ import ErrorConsoleToggle from "@/components/ErrorConsoleToggle";
 import Index from "./pages/Index";
 import Gallery from "./pages/Gallery";
 import Admin from "./pages/Admin";
+import SetupAdmin from "./pages/SetupAdmin";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancel from "./pages/PaymentCancel";
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/setup-admin" element={<SetupAdmin />} />
             <Route path="/safari-guide" element={<SafariGuide />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-cancel" element={<PaymentCancel />} />
