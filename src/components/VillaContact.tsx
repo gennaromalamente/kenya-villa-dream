@@ -65,7 +65,7 @@ const VillaContact = ({ id }: VillaContactProps = {}) => {
                   </div>
                   <div>
                     <h3 className="font-semibold">Chiamaci</h3>
-                    <p className="text-muted-foreground">+39 123 456 789</p>
+                    <p className="text-muted-foreground">+39 3473534639</p>
                   </div>
                 </div>
                 
@@ -151,7 +151,7 @@ const VillaContact = ({ id }: VillaContactProps = {}) => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="+39 123 456 789"
+                    placeholder="+39 3473534639"
                     className="border-primary/30 focus:border-primary"
                   />
                 </div>
