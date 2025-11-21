@@ -64,7 +64,15 @@ const FollowUpNotification = () => {
               onClick={() => window.open('https://wa.me/393473534639?text=Ciao! Ho visto la villa sul sito e vorrei maggiori informazioni.')}
             >
               <MessageCircle className="w-4 h-4 mr-2" />
-              Chat WhatsApp Immediata
+              WhatsApp Italia
+            </Button>
+            
+            <Button 
+              className="w-full justify-start bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => window.open('https://wa.me/254756317357?text=Ciao! Ho visto la villa sul sito e vorrei maggiori informazioni.')}
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              WhatsApp Kenya
             </Button>
 
             <Button 
@@ -73,7 +81,16 @@ const FollowUpNotification = () => {
               onClick={() => window.open('tel:+393473534639')}
             >
               <Phone className="w-4 h-4 mr-2" />
-              Chiamata Diretta
+              Chiamata Italia
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="w-full justify-start border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+              onClick={() => window.open('tel:+254756317357')}
+            >
+              <Phone className="w-4 h-4 mr-2" />
+              Chiamata Kenya
             </Button>
           </div>
 
