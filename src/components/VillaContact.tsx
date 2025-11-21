@@ -64,8 +64,18 @@ const VillaContact = ({ id }: VillaContactProps = {}) => {
                     <Phone className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">Chiamaci</h3>
+                    <h3 className="font-semibold">Chiamaci (Italia)</h3>
                     <p className="text-muted-foreground">+39 3473534639</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-4 p-4 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors">
+                  <div className="bg-primary/20 p-3 rounded-full">
+                    <Phone className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Chiamaci (Kenya)</h3>
+                    <p className="text-muted-foreground">+254 756317357</p>
                   </div>
                 </div>
                 

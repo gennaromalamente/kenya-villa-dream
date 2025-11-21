@@ -112,7 +112,8 @@ const SideMenu = () => {
 
   const contactActions = [
     { name: "Email", icon: <Mail className="w-5 h-5" />, action: () => window.open('mailto:info@villakenya.com') },
-    { name: "WhatsApp", icon: <MessageCircle className="w-5 h-5" />, action: () => window.open('https://wa.me/393473534639'), color: "text-green-600" },
+    { name: "WhatsApp IT (+39)", icon: <MessageCircle className="w-5 h-5" />, action: () => window.open('https://wa.me/393473534639'), color: "text-green-600" },
+    { name: "WhatsApp KE (+254)", icon: <MessageCircle className="w-5 h-5" />, action: () => window.open('https://wa.me/254756317357'), color: "text-green-600" },
     { name: "Mappa", icon: <MapPin className="w-5 h-5" />, action: () => window.open('https://maps.google.com/search/Kenya+Villa') },
   ];
 

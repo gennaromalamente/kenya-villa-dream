@@ -177,7 +177,17 @@ const Navigation = () => {
               onClick={() => window.open('https://wa.me/393473534639')}
             >
               <MessageCircle className="w-4 h-4" />
-              <span className="hidden xl:inline">WhatsApp</span>
+              <span className="hidden xl:inline">WhatsApp IT</span>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="flex items-center space-x-2 text-green-600 border-green-600 hover:bg-green-50"
+              onClick={() => window.open('https://wa.me/254756317357')}
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span className="hidden xl:inline">WhatsApp KE</span>
             </Button>
 
             <Button 
@@ -405,7 +415,16 @@ const Navigation = () => {
                     onClick={() => window.open('https://wa.me/393473534639')}
                   >
                     <MessageCircle className="w-4 h-4 mr-3" />
-                    Chat WhatsApp
+                    WhatsApp Italia (+39 3473534639)
+                  </Button>
+                  
+                  <Button 
+                    className="w-full justify-start text-green-600 border-green-600 hover:bg-green-50"
+                    variant="outline"
+                    onClick={() => window.open('https://wa.me/254756317357')}
+                  >
+                    <MessageCircle className="w-4 h-4 mr-3" />
+                    WhatsApp Kenya (+254 756317357)
                   </Button>
 
                   <Button 
