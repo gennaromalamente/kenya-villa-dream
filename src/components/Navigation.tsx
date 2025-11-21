@@ -174,7 +174,7 @@ const Navigation = () => {
               variant="outline" 
               size="sm"
               className="flex items-center space-x-2 text-green-600 border-green-600 hover:bg-green-50"
-              onClick={() => window.open('https://wa.me/+254700000000')}
+              onClick={() => window.open('https://wa.me/393473534639')}
             >
               <MessageCircle className="w-4 h-4" />
               <span className="hidden xl:inline">WhatsApp</span>
@@ -402,7 +402,7 @@ const Navigation = () => {
                   <Button 
                     className="w-full justify-start text-green-600 border-green-600 hover:bg-green-50"
                     variant="outline"
-                    onClick={() => window.open('https://wa.me/+254700000000')}
+                    onClick={() => window.open('https://wa.me/393473534639')}
                   >
                     <MessageCircle className="w-4 h-4 mr-3" />
                     Chat WhatsApp
